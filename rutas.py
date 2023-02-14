@@ -1,6 +1,6 @@
 from typing import List
 
-from .grafo import Grafo
+from grafo import Grafo
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -18,7 +18,7 @@ class Rutas:
         self.grafos: List[Grafo] = []
 
         for _ in range(nGrafos):
-            self.graphs.append(Grafo(nNodos, nDepots, plot_demand=drawDemand))
+            self.grafos.append(Grafo(nNodos, nDepots, plot_demand=drawDemand))
 
 
     def getDistance(self, graph_idx: int, node_idx_1: int, node_idx_2: int) -> float:

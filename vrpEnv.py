@@ -5,10 +5,10 @@ import numpy as np
 
 from rutas import Rutas
 
-class VrpEnv(gym.Env):
+class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos, nNodos, nGrafos, nVisualizaciones):
+    def __init__(self, nVehiculos = 1, nNodos = 20, nGrafos = 10, nVisualizaciones = 5):
         assert (
                 nVisualizaciones <= nGrafos
             ), "Num_draw needs to be equal or lower than the number of generated graphs."
@@ -41,10 +41,8 @@ class VrpEnv(gym.Env):
 
         self.current_location = np.array(actions)
 
-        if self.video_save_path is not None:
-            self.vid.capture_frame()
-
         done = self.is_done()
+
         return (
             self.get_state(),
             -self.sampler.get_distances(traversed_edges),
@@ -62,14 +60,14 @@ class VrpEnv(gym.Env):
         )
 
         # set current location to the depots
-        self.depots = self.sampler.getDepots() # TODO
+        self.depots = self.sampler.getDepots()
         self.current_location = self.depots
 
-        self.demands = self.sampler.getDemands() # TODO
+        self.demands = self.sampler.getDemands()
 
         self.load = np.ones(shape=(self.nGrafos,))
         
-        return self.get_state() # TODO
+        return self.get_state()
 
 
     def get_state(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -119,6 +117,13 @@ class VrpEnv(gym.Env):
         mask[exceed_demand_idxs] = 1
 
         return mask
+        
+    def is_done(self):
+        return np.all(self.visited == 1)
 
-    def render(self, mode='human', close=False):
-        pass
+    def render(self, mode: str = "rgb_array"):
+        """
+        Visualize one step in the env. Since its batched 
+        this methods renders n random graphs from the batch.
+        """
+        return self.sampler.draw(self.draw_idxs)

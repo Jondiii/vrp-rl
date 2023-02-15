@@ -1,6 +1,9 @@
 from typing import Tuple, Union
 
+from math import floor
+
 import gym
+from gym import spaces
 import numpy as np
 
 from rutas import Rutas
@@ -9,121 +12,77 @@ class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self, nVehiculos = 1, nNodos = 20, nGrafos = 10, nVisualizaciones = 5):
-        assert (
-                nVisualizaciones <= nGrafos
-            ), "Num_draw needs to be equal or lower than the number of generated graphs."
-
         self.step_count = 0
         self.nNodos = nNodos
         self.nGrafos = nGrafos
         self.nVehiculos = nVehiculos
         self.nVisualizaciones = nVisualizaciones
 
-        self.load = np.ones(shape=(nNodos,))
+        # Tantas acciones como (número de nodos + depot) * número de vehículos
+        nActions = (nNodos + 1) * nVehiculos
 
+        self.action_space = spaces.Discrete(nActions)
+        self.actions = np.arrange(stop = nActions)
 
-    def step(self, actions):
+    def step(self, action):
         self.step_count += 1
+        
+        # Comprobar si la acción es válida
+        if not self.checkAction(action):
+            return (
+                self.getState(),
+                -1,  # reward
+                False,
+                None
+            )
+        
+        # supongamos que nNodos = 6, nVehiculos = 2 y action = 14
 
-        # visit each next node
-        self.visited[np.arange(len(actions)), actions.T] = 1
-        traversed_edges = np.hstack([self.current_location, actions]).astype(int)
-        self.sampler.visit_edges(traversed_edges)
+        vehiculo = floor(action % self.nNodos) # Calculamos el vehículo que realiza la acción
+        # vehiculo = 1, es decir, el segundo vehículo
 
-        # get demand of the visited nodes
-        selected_demands = self.demands[
-            np.arange(len(self.demands)), actions.T
-        ].squeeze()
+        action -= (self.nNodos + 1) * vehiculo
+        # action = 14 - (6 + 1) * 1 = 7
+        
+        # Eliminar el lugar que se acaba de visitar de las posibles acciones
+        self.visited[:,action] = 1
 
-        # update load of each vehicle
-        self.load -= selected_demands
-        self.load[np.where(actions == self.depots)[0]] = 1
+        # Variar posición del vehículo que realice la acción
+        self.posicionActual[vehiculo] = action
 
-        self.current_location = np.array(actions)
+        # Calcular la recompensa #TODO
+        reward = 1
 
+        # Comprobar si se ha llegado al final del entorno
         done = self.is_done()
 
         return (
-            self.get_state(),
-            -self.sampler.get_distances(traversed_edges),
+            self.getState(),
+            reward,
             done,
-            None,
+            None
         )
 
     def reset(self):
         self.step_count = 0
-        
-        # Ponemos los nodos visitados a 0
-        self.visited = np.zeros(shape=(self.nGrafos, self.nNodos))
-        self.sampler = Rutas(
-            num_graphs=self.nGrafos, num_nodes=self.nNodos, num_depots=1, drawDemand = True,
-        )
 
-        # set current location to the depots
-        self.depots = self.sampler.getDepots()
-        self.current_location = self.depots
+        self.visited = np.zeros(shape=(self.nVehiculos, self.nNodos))
 
-        self.demands = self.sampler.getDemands()
+        self.posicionActual = np.zeros(self.nVehiculos)
 
-        self.load = np.ones(shape=(self.nGrafos,))
-        
-        return self.get_state()
+        return self.getState()
 
-
-    def get_state(self) -> Tuple[np.ndarray, np.ndarray]:
-
-        # generate state (depots not yet set)
-        state = np.dstack(
-            [
-                self.sampler.getGraphPositions(),
-                self.demands,
-                np.zeros((self.nGrafos, self.nNodos)),
-                self.generate_mask(),
-            ]
-        )
-
-        # set depots in state to 1
-        state[np.arange(len(state)), self.depots.T, 3] = 1
-
-        return (state, self.load)
+    def checkAction(self, actions) -> bool:
+        pass
+    
+    def getState(self):
+        pass
 
     def generate_mask(self):
-        """
-        Generates a mask of where the nodes marked as 1 cannot
-        be visited in the next step according to the env dynamic.
+        pass
 
-        Returns:
-            np.ndarray: Returns mask for each (un)visitable node
-                in each graph. Shape (batch_size, num_nodes)
-        """
-
-        # disallow staying at the depot
-        depot_graphs_idxs = np.where(self.current_location == self.depots)[0]
-        self.visited[depot_graphs_idxs, self.depots[depot_graphs_idxs].squeeze()] = 1
-
-        # allow visiting the depot when not currently at the depot
-        depot_graphs_idxs_not = np.where(self.current_location != self.depots)[0]
-        self.visited[
-            depot_graphs_idxs_not, self.depots[depot_graphs_idxs_not].squeeze()
-        ] = 0
-
-        # allow staying on a depot if the graph is solved.
-        done_graphs = np.where(np.all(self.visited, axis=1) == True)[0]
-        self.visited[done_graphs, self.depots[done_graphs].squeeze()] = 0
-
-        # disallow visiting nodes that exceed the current load.
-        mask = np.copy(self.visited)
-        exceed_demand_idxs = ((self.demands - self.load[:, None, None]) > 0).squeeze()
-        mask[exceed_demand_idxs] = 1
-
-        return mask
-        
     def is_done(self):
         return np.all(self.visited == 1)
-
-    def render(self, mode: str = "rgb_array"):
-        """
-        Visualize one step in the env. Since its batched 
-        this methods renders n random graphs from the batch.
-        """
-        return self.sampler.draw(self.draw_idxs)
+    
+    def render(self):
+        pass

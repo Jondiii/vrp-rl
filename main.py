@@ -2,7 +2,7 @@ from vrpEnv import VRPEnv
 #from vrpAgent import VRPAgent
 import pandas as pd
 
-from stable_baselines import PPO
+from stable_baselines3 import PPO
 
 #dataFleet = pd.read_excel('G:\\.shortcut-targets-by-id\\1qK9SxHRVCvkj4iS9W-ahASG8b_uAaBAV\\2022 11 FLEETBOT\\PruebasRL\\vrpgym\\VRP-GYM\\datos\\Caso100Jobs.xlsb', skiprows=1)
 
@@ -10,9 +10,9 @@ from stable_baselines import PPO
 #print(dataFleet.loc[0])
 
 # Init the environment
-env = VRPEnv(nNodos=5, nGrafos=6)
+env = VRPEnv(nNodos=2, nGrafos=6)
 
-model = PPO("MlpPolicy", env, verbose=1)
+model = PPO("MultiInputPolicy", env, verbose=1)
 
 model.learn(total_timesteps=2000)
 

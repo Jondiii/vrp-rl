@@ -25,3 +25,5 @@ TIMESTEPS = 1000
 for i in range(1, ITERATIONS):
     model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps=False, tb_log_name=ALGORTIHM)
     model.save(f"{models_dir}/{TIMESTEPS*i}")
+
+env.close()

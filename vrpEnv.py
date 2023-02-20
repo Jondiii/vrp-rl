@@ -1,6 +1,7 @@
 import gym
 from gym import spaces
 import numpy as np
+from grafo import Grafo
 
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
@@ -16,6 +17,8 @@ class VRPEnv(gym.Env):
         
         self.maxCapacity = maxCapacity
         self.demands = np.random.randint(low = 1, high = 30, size=self.nNodos)
+        self.coordenadas = np.random.rand(nNodos, 2)
+
         self.loads = np.zeros(shape=self.nVehiculos) + self.maxCapacity
 
         # Tantas acciones como (número de nodos + depot) * número de vehículos
@@ -77,11 +80,16 @@ class VRPEnv(gym.Env):
 
         return obs
 
+    # TODO
     def generate_mask(self):
         pass
+
+    def crearGrafo(self):
+        self.grafo = Grafo()
 
     def is_done(self):
         return bool(np.all(self.visited == 1))
     
+    # TODO
     def render(self):
         pass

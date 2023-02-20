@@ -1,31 +1,27 @@
 from vrpEnv import VRPEnv
-#from vrpAgent import VRPAgent
-import pandas as pd
+import os
 
 from stable_baselines3 import PPO
 
-#dataFleet = pd.read_excel('G:\\.shortcut-targets-by-id\\1qK9SxHRVCvkj4iS9W-ahASG8b_uAaBAV\\2022 11 FLEETBOT\\PruebasRL\\vrpgym\\VRP-GYM\\datos\\Caso100Jobs.xlsb', skiprows=1)
+ALGORTIHM = "PPO"
+models_dir = "models/" + ALGORTIHM
+log_dir = "logs"
 
-#TODO: meterle los datos de un excel
-#print(dataFleet.loc[0])
+if not os.path.exists(models_dir):
+    os.makedirs(models_dir)
 
-# Init the environment
-env = VRPEnv(nNodos=2, nGrafos=6)
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 
-model = PPO("MultiInputPolicy", env, verbose=1)
+env = VRPEnv(nVehiculos = 1, nNodos=3, nGrafos=5)
 
-model.learn(total_timesteps=2000)
+env.reset()
 
-obs = env.reset()
-for i in range(2000):
-    action, _states = model.predict(obs)
-    obs, rewards, done, info = env.step(action)
-    env.render()
+model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
-# Init the agent
-#agent = VRPAgent()
+ITERATIONS = 100
+TIMESTEPS = 1000
 
-# Start training
-#agent.train(env, epochs = 10)
-
-# El agente principal es graph_tsp_agent.py, los cambios a la lógica van ahí.
+for i in range(1, ITERATIONS):
+    model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps=False, tb_log_name=ALGORTIHM)
+    model.save(f"{models_dir}/{TIMESTEPS*i}")

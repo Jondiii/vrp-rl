@@ -1,7 +1,3 @@
-from typing import Tuple, Union
-
-from math import floor
-
 import gym
 from gym import spaces
 import numpy as np
@@ -28,7 +24,7 @@ class VRPEnv(gym.Env):
         self.action_space = spaces.Discrete(self.nActions)
 
         self.observation_space = spaces.Dict({
-            "visited" :  spaces.MultiDiscrete(np.zeros(shape=(self.nVehiculos, self.nNodos)) + 2),
+            "visited" :  spaces.MultiDiscrete(np.zeros(shape=(self.nNodos)) + 2),
             "curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos)
         })
 
@@ -48,7 +44,7 @@ class VRPEnv(gym.Env):
             return self.getState(), -1, False, dict()
 
         # Eliminar el lugar que se acaba de visitar de las posibles acciones
-        self.visited[:,action] = 1
+        self.visited[action] = 1
 
         # Variar posición del vehículo que realice la acción
         self.posicionActual[vehiculo] = action
@@ -63,13 +59,13 @@ class VRPEnv(gym.Env):
 
     def reset(self):
         self.step_count = 0
-        self.visited = np.zeros(shape=(self.nVehiculos, self.nNodos))
+        self.visited = np.zeros(shape=(self.nNodos))
         self.posicionActual = np.zeros(shape = self.nVehiculos)
 
         return self.getState()
 
     def checkAction(self, action, vehiculo) -> bool:
-        if self.visited[vehiculo,action] == 1:
+        if self.visited[action] == 1:
             return False
 
         return True

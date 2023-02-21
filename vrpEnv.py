@@ -46,7 +46,9 @@ class VRPEnv(gym.Env):
         # Comprobar si la acción es válida
         if not self.checkAction(action, vehiculo):
             return self.getState(), -1, False, dict()
-
+        
+        self.loads[vehiculo] -= self.demands[action] # Añadimos la demanda del nodo a la carga del vehículo
+        
         # Eliminar el lugar que se acaba de visitar de las posibles acciones
         self.visited[action] = 1
 
@@ -54,31 +56,34 @@ class VRPEnv(gym.Env):
         self.grafo.visitEdge(self.posicionActual[vehiculo], action)
 
         # Calcular la recompensa #TODO
-        if self.posicionActual[vehiculo] == action:
-            reward = 0
-        else:
-            reward = 1
-
+        reward = 1
+        print(self.posicionActual)
         # Variar posición del vehículo que realice la acción
         self.posicionActual[vehiculo] = action
 
         # Comprobar si se ha llegado al final del entorno
         done = self.is_done()
-        
+        print(done)
         return self.getState(), reward, done, dict()
 
     def reset(self):
         self.step_count = 0
         self.visited = np.zeros(shape=(self.nNodos))
         self.posicionActual = np.zeros(shape = self.nVehiculos)
-        
+        self.loads = np.zeros(shape=self.nVehiculos) + self.maxCapacity
+
         # Creamos un grafo nuevo
         self.grafo = Grafo(self.nNodos, self.demands, self.coordenadas)
+
+        self.done = False
 
         return self.getState()
 
     def checkAction(self, action, vehiculo) -> bool:
         if self.visited[action] == 1:
+            return False
+        
+        if self.loads[vehiculo] - self.demands[action] < 0:
             return False
 
         return True

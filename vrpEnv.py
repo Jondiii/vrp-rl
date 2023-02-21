@@ -26,9 +26,15 @@ class VRPEnv(gym.Env):
 
         self.action_space = spaces.Discrete(self.nActions)
 
+        # Aquí se define cómo serán las observaciones que se pasarán al agente.
+        # Se usa multidiscrete para datos que vengan en formato array. Hay que definir el tamaño de estos arrays
+        # y sus valores máximos. La primera, "visited", podrá tomar un máximo de 2 valores en cada posición del array
+        # (1 visitado - 0 sin visitar), por lo que le pasamos un array [2,2,...,2]
         self.observation_space = spaces.Dict({
             "visited" :  spaces.MultiDiscrete(np.zeros(shape=(self.nNodos)) + 2),
-            "curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos)
+            "curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos),
+            "vehicle_loads" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.maxCapacity),
+            "demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + 30)  # AÑADIR MAX NODE CAPACITY
         })
 
 
@@ -57,13 +63,12 @@ class VRPEnv(gym.Env):
 
         # Calcular la recompensa #TODO
         reward = 1
-        print(self.posicionActual)
         # Variar posición del vehículo que realice la acción
         self.posicionActual[vehiculo] = action
 
         # Comprobar si se ha llegado al final del entorno
         done = self.is_done()
-        print(done)
+
         return self.getState(), reward, done, dict()
 
     def reset(self):
@@ -92,6 +97,9 @@ class VRPEnv(gym.Env):
         obs = dict()
         obs["visited"] = self.visited
         obs["curr_position"] = self.posicionActual
+        obs["vehicle_loads"] = self.loads
+        obs["demands"] = self.demands   # No sé si tiene mucho sentido pasarle la demanda cuando esta no va a cambiar...
+                                        # A no ser que pongamos la demanda de un nodo a 0 cuando esta sea recogida.
 
         return obs
 

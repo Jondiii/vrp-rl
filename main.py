@@ -20,10 +20,12 @@ env.reset()
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
 ITERATIONS = 100
-TIMESTEPS = 1000
+TIMESTEPS = 10000
 
 for i in range(1, ITERATIONS):
     model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps=False, tb_log_name=ALGORTIHM)
     model.save(f"{models_dir}/{TIMESTEPS*i}")
+
+env.render()
 
 env.close()

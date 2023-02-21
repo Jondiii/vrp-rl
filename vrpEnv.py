@@ -17,7 +17,7 @@ class VRPEnv(gym.Env):
         
         self.maxCapacity = maxCapacity
         self.demands = np.random.randint(low = 1, high = 30, size=self.nNodos)
-        self.coordenadas = np.random.rand(nNodos, 2)
+        self.coordenadas = np.random.rand(nNodos+1, 2) # [0, nNodos), por lo que hay que sumarle +1
 
         self.loads = np.zeros(shape=self.nVehiculos) + self.maxCapacity
 
@@ -30,6 +30,7 @@ class VRPEnv(gym.Env):
             "visited" :  spaces.MultiDiscrete(np.zeros(shape=(self.nNodos)) + 2),
             "curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos)
         })
+
 
     def step(self, action):
         self.step_count += 1
@@ -49,11 +50,17 @@ class VRPEnv(gym.Env):
         # Eliminar el lugar que se acaba de visitar de las posibles acciones
         self.visited[action] = 1
 
-        # Variar posición del vehículo que realice la acción
-        self.posicionActual[vehiculo] = action
+        # Marcamos la visita en el grafo
+        self.grafo.visitEdge(self.posicionActual[vehiculo], action)
 
         # Calcular la recompensa #TODO
-        reward = 1
+        if self.posicionActual[vehiculo] == action:
+            reward = 0
+        else:
+            reward = 1
+
+        # Variar posición del vehículo que realice la acción
+        self.posicionActual[vehiculo] = action
 
         # Comprobar si se ha llegado al final del entorno
         done = self.is_done()
@@ -64,6 +71,9 @@ class VRPEnv(gym.Env):
         self.step_count = 0
         self.visited = np.zeros(shape=(self.nNodos))
         self.posicionActual = np.zeros(shape = self.nVehiculos)
+        
+        # Creamos un grafo nuevo
+        self.grafo = Grafo(self.nNodos, self.demands, self.coordenadas)
 
         return self.getState()
 
@@ -84,12 +94,9 @@ class VRPEnv(gym.Env):
     def generate_mask(self):
         pass
 
-    def crearGrafo(self):
-        self.grafo = Grafo()
 
     def is_done(self):
         return bool(np.all(self.visited == 1))
     
-    # TODO
     def render(self):
-        pass
+        self.grafo.guardarGrafo()

@@ -1,4 +1,6 @@
 models/
+logs/
+grafos/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

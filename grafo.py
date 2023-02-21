@@ -70,8 +70,6 @@ class Grafo:
         posicion = nx.get_node_attributes(self.graph, "coordinates")
         coloresNodos = nx.get_node_attributes(self.graph, "node_color").values()
 
-        print(posicion)
-
         # Primero dibujamos los nodos
         nx.draw_networkx_nodes(self.graph, posicion, node_color=coloresNodos, node_size=100)
 

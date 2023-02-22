@@ -35,7 +35,7 @@ class Grafo:
         self.graph.nodes[0]["node_color"] = "red"
 
         # Offset a usar a la hora de dibujar labels
-        self.offset = np.array([0, 0.075])
+        self.offset = np.array([0, 0.045])
 
     def visitEdge(self, sourceNode, targetNode):
         if sourceNode == targetNode:
@@ -91,3 +91,7 @@ class Grafo:
             nx.draw_networkx_labels(
                 self.graph, posicionLabelDemanda, labels=labelDemanda
             )
+
+    def getDistance(self, node1, node2):
+        # https://stackoverflow.com/questions/1401712/how-can-the-euclidean-distance-be-calculated-with-numpy
+        return np.linalg.norm(self.graph.nodes[node1]["coordinates"] - self.graph.nodes[node2]["coordinates"])

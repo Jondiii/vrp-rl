@@ -1,7 +1,7 @@
 import gym
 from gym import spaces
 import numpy as np
-from grafo import Grafo
+from rutas import Rutas
 import copy
 
 class VRPEnv(gym.Env):
@@ -60,10 +60,10 @@ class VRPEnv(gym.Env):
         self.visited[action] = 1
 
         # Marcamos la visita en el grafo
-        self.grafo.visitEdge(self.posicionActual[vehiculo], action)
-
+        self.rutas.visitEdge(vehiculo, self.posicionActual[vehiculo], action)
+        
         # Calcular la recompensa
-        reward = abs(self.grafo.getDistance(self.posicionActual[vehiculo], action))
+        reward = abs(self.rutas.getDistance(vehiculo, self.posicionActual[vehiculo], action))
 
         # Variar posición del vehículo que realice la acción
         self.posicionActual[vehiculo] = action
@@ -81,7 +81,7 @@ class VRPEnv(gym.Env):
         self.loads = np.zeros(shape=self.nVehiculos,) + self.maxCapacity
 
         # Creamos un grafo nuevo
-        self.grafo = Grafo(self.nNodos, self.demands, self.coordenadas)
+        self.rutas = Rutas(self.nVehiculos, self.nNodos, self.demands, self.coordenadas)
 
         self.done = False
 
@@ -109,7 +109,7 @@ class VRPEnv(gym.Env):
         allVisited = bool(np.all(self.visited == 1))
 
         if allVisited and bool(np.all(self.posicionActual == 0)):
-            self.grafoCompletado = copy.deepcopy(self.grafo)
+            self.grafoCompletado = copy.deepcopy(self.rutas)
             return True
         
         elif allVisited:# Marcamos el depot como "no visitado", para que sea la única acción posible y tengan que volver al final del recorrido
@@ -118,4 +118,7 @@ class VRPEnv(gym.Env):
         return False
     
     def render(self):
-        self.grafoCompletado.guardarGrafo()
+        self.grafoCompletado.guardarGrafos()
+
+    def render2(self):
+        self.rutas.guardarGrafos()

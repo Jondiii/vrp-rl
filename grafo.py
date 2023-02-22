@@ -1,8 +1,5 @@
 import networkx as nx
 import numpy as np
-from datetime import date
-import matplotlib.pyplot as plt
-import os
 
 class Grafo:
     def __init__(self, nNodos, demands, coordenadas, nDepots = 1, drawDemand = True) -> None:
@@ -43,35 +40,12 @@ class Grafo:
         
         self.graph.edges[sourceNode, targetNode]["visited"] = True
 
-    def guardarGrafo(self, directorio = 'grafos', name = 'fig', extension = '.png'):
-        directorio = os.path.join(directorio, str(date.today()))
-
-        if not os.path.exists(directorio):
-            os.makedirs(directorio)
-
-        plt.clf()
-        
-        plt.figure()
-
-        self.dibujarGrafo()
-
-        existentes = os.listdir(directorio)
-        numeros = [int(nombre.split('_')[-1].split('.')[0]) for nombre in existentes
-               if nombre.startswith(name + '_') and nombre.endswith(extension)]
-        siguiente_numero = str(max(numeros) + 1 if numeros else 1)
-
-        nombreFigura = os.path.join(directorio, name + '_' + siguiente_numero + extension)
-
-        plt.savefig(nombreFigura)
-
-        plt.close()
-
-    def dibujarGrafo(self):
+    def dibujarGrafo(self, ax):
         posicion = nx.get_node_attributes(self.graph, "coordinates")
         coloresNodos = nx.get_node_attributes(self.graph, "node_color").values()
 
         # Primero dibujamos los nodos
-        nx.draw_networkx_nodes(self.graph, posicion, node_color=coloresNodos, node_size=100)
+        nx.draw_networkx_nodes(self.graph, posicion, node_color=coloresNodos, ax=ax, node_size=100)
 
         # Después dibujamos las aristas
         aristas = [x for x in self.graph.edges(data = True) if x[2]["visited"]]
@@ -81,6 +55,7 @@ class Grafo:
             alpha=0.5,
             edgelist=aristas,
             edge_color="red",
+            ax=ax,
             width=1.5,
         )
 
@@ -89,7 +64,7 @@ class Grafo:
             labelDemanda = nx.get_node_attributes(self.graph, "demand")
             labelDemanda = {k: np.round(v, 2) for k, v in labelDemanda.items()}
             nx.draw_networkx_labels(
-                self.graph, posicionLabelDemanda, labels=labelDemanda
+                self.graph, posicionLabelDemanda, labels=labelDemanda, ax=ax
             )
 
     def getDistance(self, node1, node2):

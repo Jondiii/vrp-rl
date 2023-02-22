@@ -1,7 +1,6 @@
+from stable_baselines3 import PPO
 from vrpEnv import VRPEnv
 import os
-
-from stable_baselines3 import PPO
 
 ALGORTIHM = "PPO"
 models_dir = "models/" + ALGORTIHM
@@ -13,7 +12,7 @@ if not os.path.exists(models_dir):
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-env = VRPEnv(nVehiculos = 1, nNodos = 5, nGrafos=5)
+env = VRPEnv(nVehiculos = 1, nNodos = 5)
 
 env.reset()
 

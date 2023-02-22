@@ -1,9 +1,8 @@
-from typing import List
 import numpy as np
 from grafo import Grafo
-import os
 from datetime import date
 import matplotlib.pyplot as plt
+import os
 
 class Rutas:
     def __init__(self, nVehiculos, nNodos, demands, coordenadas, drawDemand = True):

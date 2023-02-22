@@ -7,15 +7,10 @@ import copy
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos = 1, nNodos = 20, nGrafos = 10, nVisualizaciones = 5, maxCapacity = 100, maxNodeCapacity = 30):
-        self.step_count = 0
-        
+    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 30):        
         self.nNodos = nNodos + 1 # +1 del depot
         self.nVehiculos = nVehiculos
 
-        self.nGrafos = nGrafos
-        self.nVisualizaciones = nVisualizaciones
-        
         self.maxCapacity = maxCapacity
         self.maxNodeCapacity = maxNodeCapacity
         self.demands = np.random.randint(low = 1, high = maxNodeCapacity, size=self.nNodos)
@@ -39,9 +34,7 @@ class VRPEnv(gym.Env):
             "demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + self.maxNodeCapacity)
         })
 
-    def step(self, action):
-        self.step_count += 1
-    
+    def step(self, action):    
         # supongamos que nNodos = 6, nVehiculos = 2 y action = 6 * 2 + 2
         # Calculamos el vehículo que realiza la acción
         vehiculo = action // self.nNodos
@@ -74,7 +67,6 @@ class VRPEnv(gym.Env):
         return self.getState(), reward, done, dict()
 
     def reset(self):
-        self.step_count = 0
         self.visited = np.zeros(shape=(self.nNodos))
         self.visited[0] = 1 # El depot comienza como visitado
         self.posicionActual = np.zeros(shape = self.nVehiculos)

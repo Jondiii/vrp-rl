@@ -24,6 +24,7 @@ class Grafo:
         self.demands[0] = 0 # El depot no tiene demanda
         node_demand = {i: d for i, d in enumerate(self.demands)}
         nx.set_node_attributes(self.graph, node_demand, "demand")
+        nx.set_node_attributes(self.graph, False, "visited")
 
         # Definimos atributos del grafo
         nx.set_edge_attributes(self.graph, False, "visited")
@@ -39,13 +40,26 @@ class Grafo:
             return
         
         self.graph.edges[sourceNode, targetNode]["visited"] = True
+        self.graph.nodes[targetNode]["visited"] = True
+
 
     def dibujarGrafo(self, ax):
         posicion = nx.get_node_attributes(self.graph, "coordinates")
         coloresNodos = nx.get_node_attributes(self.graph, "node_color").values()
 
+
+        def isNodeVisited(node):
+            return node["visited"]
+
         # Primero dibujamos los nodos
-        nx.draw_networkx_nodes(self.graph, posicion, node_color=coloresNodos, ax=ax, node_size=100)
+        nx.draw_networkx_nodes(
+            self.graph,
+            posicion,
+            node_color=coloresNodos,
+            ax=ax,
+            #nodelist = nx.subgraph_view(self.graph, isNodeVisited),
+            node_size=100
+            )
 
         # Después dibujamos las aristas
         aristas = [x for x in self.graph.edges(data = True) if x[2]["visited"]]
@@ -66,6 +80,9 @@ class Grafo:
             nx.draw_networkx_labels(
                 self.graph, posicionLabelDemanda, labels=labelDemanda, ax=ax
             )
+
+
+
 
     def getDistance(self, node1, node2):
         # https://stackoverflow.com/questions/1401712/how-can-the-euclidean-distance-be-calculated-with-numpy

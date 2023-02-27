@@ -29,7 +29,6 @@ class Rutas:
     def visitEdge(self, vehiculo, nodo1, nodo2):
         self.grafos[vehiculo].visitEdge(nodo1, nodo2)
 
-
     def guardarGrafos(self, directorio = 'grafos', name = 'fig', extension = '.png'):
         directorio = os.path.join(directorio, str(date.today()))
 

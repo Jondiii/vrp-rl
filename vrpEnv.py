@@ -7,15 +7,20 @@ import copy
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 30):        
+    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 30, seed = 6, multiTrip = False):        
+        np.random.seed(seed)
+
+        self.multiTrip = multiTrip
+
         self.nNodos = nNodos + 1 # +1 del depot
         self.nVehiculos = nVehiculos
+        self.coordenadas = np.random.rand(nNodos+1, 2) # [0, nNodos), por lo que hay que sumarle +1
 
         self.maxCapacity = maxCapacity
         self.maxNodeCapacity = maxNodeCapacity
-        self.demands = np.random.randint(low = 1, high = maxNodeCapacity, size=self.nNodos)
-        self.coordenadas = np.random.rand(nNodos+1, 2) # [0, nNodos), por lo que hay que sumarle +1
-
+        self.originalDemands = np.random.randint(low = 1, high = maxNodeCapacity, size=self.nNodos)
+        self.demands = copy.deepcopy(self.originalDemands)
+        
         self.loads = np.zeros(shape=self.nVehiculos) + self.maxCapacity
 
         # Tantas acciones como (número de nodos + depot) * número de vehículos
@@ -28,13 +33,13 @@ class VRPEnv(gym.Env):
         # y sus valores máximos. La primera, "visited", podrá tomar un máximo de 2 valores en cada posición del array
         # (1 visitado - 0 sin visitar), por lo que le pasamos un array [2,2,...,2]
         self.observation_space = spaces.Dict({
-            "visited" :  spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + 2),
-            "curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos),
-            "vehicle_loads" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.maxCapacity + 1), # SOLO se pueden usar enteros
-            "demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + self.maxNodeCapacity)
+            "n_visited" :  spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + 2),
+            "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos),
+            "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.maxCapacity + 1), # SOLO se pueden usar enteros
+            "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + self.maxNodeCapacity)
         })
 
-    def step(self, action):  # TODO: poner seed // ACTION PARSER
+    def step(self, action):
         # supongamos que nNodos = 6, nVehiculos = 2 y action = 6 * 2 + 2
         # Calculamos el vehículo que realiza la acción
         vehiculo = action // self.nNodos
@@ -47,13 +52,20 @@ class VRPEnv(gym.Env):
         if not self.checkAction(action, vehiculo):
             return self.getState(), -1, False, dict()
         
-        self.loads[vehiculo] -= self.demands[action] # Añadimos la demanda del nodo a la carga del vehículo
-
         # Eliminar el lugar que se acaba de visitar de las posibles acciones
         self.visited[action] = 1
 
+        if self.multiTrip:
+            if action == 0:
+                self.loads[vehiculo] = self.maxCapacity
+                self.visited[action] = 0 # Si lo que se ha visitado es el depot, no lo marcamos como visitado 
+
+        self.loads[vehiculo] -= self.demands[action] # Añadimos la demanda del nodo a la carga del vehículo
+
+
         # Marcamos la visita en el grafo
-        self.rutas.visitEdge(vehiculo, self.posicionActual[vehiculo], action) # TODO: Poner a 0 la demanda
+        self.rutas.visitEdge(vehiculo, self.posicionActual[vehiculo], action)
+        self.demands[action] = 0
         
         # Calcular la recompensa
         reward = 1/(abs(self.rutas.getDistance(vehiculo, self.posicionActual[vehiculo], action))+1)
@@ -68,9 +80,15 @@ class VRPEnv(gym.Env):
 
     def reset(self):
         self.visited = np.zeros(shape=(self.nNodos))
-        self.visited[0] = 1 # El depot comienza como visitado # TODO: depot resetea la carga del camión (multitrip)
+        
+        if self.multiTrip:
+            self.visited[0] = 0
+        else:
+            self.visited[0] = 1 # El depot comienza como visitado
+
         self.posicionActual = np.zeros(shape = self.nVehiculos)
         self.loads = np.zeros(shape=self.nVehiculos,) + self.maxCapacity
+        self.demands = copy.deepcopy(self.originalDemands)
 
         # Creamos un conjunto de rutas nuevo
         self.rutas = Rutas(self.nVehiculos, self.nNodos, self.demands, self.coordenadas)
@@ -88,23 +106,30 @@ class VRPEnv(gym.Env):
 
         return True
     
-    def getState(self): # TODO: n_, v_
+    def getState(self):
         obs = dict()
-        obs["visited"] = self.visited
-        obs["curr_position"] = self.posicionActual
-        obs["vehicle_loads"] = self.loads
-        obs["demands"] = self.demands   # No sé si tiene mucho sentido pasarle la demanda cuando esta no va a cambiar...
+        obs["n_visited"] = self.visited
+        obs["v_curr_position"] = self.posicionActual
+        obs["v_loads"] = self.loads
+        obs["n_demands"] = self.demands   # No sé si tiene mucho sentido pasarle la demanda cuando esta no va a cambiar...
                                         # A no ser que pongamos la demanda de un nodo a 0 cuando esta sea recogida.
         return obs
 
-    def isDone(self): # TODO: cambiar esto de orden, primero comprobar vehículo y después nodos
+    def isDone(self): # can't DO: cambiar esto de orden, primero comprobar vehículo y después nodos --> no se puede por lo de marcar el depot como no visitado
+        if self.multiTrip:
+            allVisited = np.all(self.visited[1:] == 1)
+
+            if allVisited:
+                self.grafoCompletado = copy.deepcopy(self.rutas)
+                return True
+
         allVisited = np.all(self.visited == 1)
 
         if allVisited:
             if np.all(self.posicionActual == 0):
                 self.grafoCompletado = copy.deepcopy(self.rutas)
                 return True
-        
+
             else:# Marcamos el depot como "no visitado", para que sea la única acción posible y tengan que volver al final del recorrido
                 self.visited[0] = 0 
 
@@ -117,3 +142,9 @@ class VRPEnv(gym.Env):
     # Guarda el conjunto actual de grafos, independientemente de si están completos o no
     def render2(self):
         self.rutas.guardarGrafos()
+
+    def actionParser(self, action):
+        vehiculo = action // self.nNodos        
+        action = action % self.nNodos
+
+        return str(vehiculo) + "_" + str(action)

@@ -65,12 +65,14 @@ class VRPEnv(gym.Env):
 
         # Marcamos la visita en el grafo
         self.rutas.visitEdge(vehiculo, self.posicionActual[vehiculo], action)
+
+        # Ponemos la demanda del nodo a 0
         self.demands[action] = 0
         
-        # Calcular la recompensa
-        reward = 1/(abs(self.rutas.getDistance(vehiculo, self.posicionActual[vehiculo], action))+1)
+        # Calcular la recompensa. Será inversamente proporcional a la distancia recorrida. 
+        reward = self.getReward(vehiculo, action)
 
-        # Variar posición del vehículo que realice la acción
+        # Variar posición del vehículo que realice la acción.
         self.posicionActual[vehiculo] = action
 
         # Comprobar si se ha llegado al final del episodio
@@ -135,6 +137,15 @@ class VRPEnv(gym.Env):
         
         return False
     
+    def getReward(self, vehiculo, action):
+        distancia = abs(self.rutas.getDistance(vehiculo, self.posicionActual[vehiculo], action))
+        reward = round(1/distancia, 2)
+
+        if distancia == 0:
+            reward = 0
+        
+        return reward
+
     # Guarda el último conjunto de grafos completado 
     def render(self):
         self.grafoCompletado.guardarGrafos()

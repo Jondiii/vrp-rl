@@ -123,16 +123,16 @@ class VRPEnv(gym.Env):
                 self.grafoCompletado = copy.deepcopy(self.rutas)
                 return True
 
-        allVisited = np.all(self.visited == 1)
-
-        if allVisited:
-            if np.all(self.posicionActual == 0):
+        if np.all(self.posicionActual == 0):
+            allVisited = np.all(self.visited == 1)
+            if allVisited:
                 self.grafoCompletado = copy.deepcopy(self.rutas)
                 return True
-
-            else:# Marcamos el depot como "no visitado", para que sea la única acción posible y tengan que volver al final del recorrido
+        else:
+            allVisited = np.all(self.visited == 1)
+            if allVisited:
                 self.visited[0] = 0 
-
+        
         return False
     
     # Guarda el último conjunto de grafos completado 

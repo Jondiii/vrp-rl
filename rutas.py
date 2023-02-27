@@ -56,3 +56,37 @@ class Rutas:
         plt.savefig(nombreFigura)
 
         plt.close()
+    
+
+    def guardarGrafosSinglePlot(self, directorio = 'grafos', name = 'fig', extension = '.png'):
+        directorio = os.path.join(directorio, str(date.today()))
+
+        if not os.path.exists(directorio):
+            os.makedirs(directorio)
+
+        # Para más info sobre colores: https://matplotlib.org/stable/tutorials/colors/colors.html
+        colorList = [
+            "tab:red",
+            "tab:orange",
+            "tab:olive",
+            "tab:green",
+            "tab:blue",
+            "tab:purple",
+        ]
+
+        plt.clf()
+        ax = plt.subplot(1, 1, 1)
+        
+        for idGrafo, color in zip(range(len(self.grafos)), colorList):
+            self.grafos[idGrafo].dibujarGrafo(ax = ax, edgeColor = color)
+
+        existentes = os.listdir(directorio)
+        numeros = [int(nombre.split('_')[-1].split('.')[0]) for nombre in existentes
+               if nombre.startswith(name + '_') and nombre.endswith(extension)]
+        siguiente_numero = str(max(numeros) + 1 if numeros else 1)
+
+        nombreFigura = os.path.join(directorio, name + '_' + siguiente_numero + extension)
+
+        plt.savefig(nombreFigura)
+
+        plt.close()

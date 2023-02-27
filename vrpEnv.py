@@ -7,10 +7,11 @@ import copy
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 30, seed = 6, multiTrip = False):        
+    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 30, seed = 6, multiTrip = False, singlePlot = False):        
         np.random.seed(seed)
 
         self.multiTrip = multiTrip
+        self.singlePlot = singlePlot
 
         self.nNodos = nNodos + 1 # +1 del depot
         self.nVehiculos = nVehiculos
@@ -148,12 +149,20 @@ class VRPEnv(gym.Env):
 
     # Guarda el último conjunto de grafos completado 
     def render(self):
-        self.grafoCompletado.guardarGrafos()
+        if self.singlePlot:
+            self.grafoCompletado.guardarGrafosSinglePlot()
+
+        else:
+            self.grafoCompletado.guardarGrafos()
 
     # Guarda el conjunto actual de grafos, independientemente de si están completos o no
     def render2(self):
-        self.rutas.guardarGrafos()
-
+        if self.singlePlot:
+            self.rutas.guardarGrafosSinglePlot()
+            
+        else:
+            self.rutas.guardarGrafos()
+            
     def actionParser(self, action):
         vehiculo = action // self.nNodos        
         action = action % self.nNodos

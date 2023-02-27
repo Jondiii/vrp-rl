@@ -43,7 +43,7 @@ class Grafo:
         self.graph.nodes[targetNode]["visited"] = True
 
 
-    def dibujarGrafo(self, ax):
+    def dibujarGrafo(self, ax, edgeColor = "red"):
         posicion = nx.get_node_attributes(self.graph, "coordinates")
         coloresNodos = nx.get_node_attributes(self.graph, "node_color").values()
 
@@ -68,7 +68,7 @@ class Grafo:
             posicion,
             alpha=0.5,
             edgelist=aristas,
-            edge_color="red",
+            edge_color=edgeColor,
             ax=ax,
             width=1.5,
         )

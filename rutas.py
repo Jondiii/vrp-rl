@@ -70,8 +70,12 @@ class Rutas:
             "tab:orange",
             "tab:olive",
             "tab:green",
+            "tab:cyan",
             "tab:blue",
             "tab:purple",
+            "tab:pink",
+            "tab:brown",
+            "tab:gray"
         ]
 
         plt.clf()

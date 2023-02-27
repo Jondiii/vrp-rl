@@ -2,10 +2,12 @@ import networkx as nx
 import numpy as np
 
 class Grafo:
-    def __init__(self, nNodos, demands, coordenadas, nDepots = 1, drawDemand = True) -> None:
+    def __init__(self, nNodos, demands, coordenadas, speed, nDepots = 1, drawDemand = True) -> None:
         self.nNodos = nNodos
         self.nDepots = nDepots
         self.demands = demands
+        self.speed = speed
+
         self.drawDemand = drawDemand
 
         self.graph = nx.complete_graph(nNodos)
@@ -37,16 +39,20 @@ class Grafo:
 
     def visitEdge(self, sourceNode, targetNode):
         if sourceNode == targetNode:
-            return
+            return 0, 0
         
+        distancia = self.getDistance(sourceNode, targetNode)
+        tiempo = self.getTime(distancia)
+
         self.graph.edges[sourceNode, targetNode]["visited"] = True
         self.graph.nodes[targetNode]["visited"] = True
+
+        return distancia, tiempo
 
 
     def dibujarGrafo(self, ax, edgeColor = "red"):
         posicion = nx.get_node_attributes(self.graph, "coordinates")
         coloresNodos = nx.get_node_attributes(self.graph, "node_color").values()
-
 
         def isNodeVisited(node):
             return node["visited"]
@@ -82,8 +88,10 @@ class Grafo:
             )
 
 
-
-
     def getDistance(self, node1, node2):
         # https://stackoverflow.com/questions/1401712/how-can-the-euclidean-distance-be-calculated-with-numpy
         return np.linalg.norm(self.graph.nodes[node1]["coordinates"] - self.graph.nodes[node2]["coordinates"])
+
+    # TODO comprobar que esto esté bien
+    def getTime(self, distancia):
+        return distancia * 60 / self.speed

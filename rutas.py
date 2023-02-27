@@ -5,13 +5,14 @@ import matplotlib.pyplot as plt
 import os
 
 class Rutas:
-    def __init__(self, nVehiculos, nNodos, demands, coordenadas, drawDemand = True):
+    def __init__(self, nVehiculos, nNodos, demands, coordenadas, speeds, drawDemand = True):
         self.grafos = []
 
         self.nNodos = nNodos
         self.nVehiculos = nVehiculos
         self.demands = demands
         self.coordenadas = coordenadas
+        self.speeds = speeds
         self.drawDemand = drawDemand
 
         self.crearGrafos()
@@ -19,15 +20,21 @@ class Rutas:
 
     def crearGrafos(self):
         for i in range(self.nVehiculos):
-            self.grafos.append(Grafo(self.nNodos, self.demands, self.coordenadas, self.drawDemand))
+            self.grafos.append(Grafo(self.nNodos, self.demands, self.coordenadas, self.speeds[i], self.drawDemand))
 
 
     def getDistance(self, vehiculo, nodo1, nodo2):
         return self.grafos[vehiculo].getDistance(nodo1, nodo2)
 
 
+    def getTime(self, vehiculo, nodo1, nodo2):
+        return self.grafos[vehiculo].getTime(self.getDistance(vehiculo, nodo1, nodo2))
+
+
     def visitEdge(self, vehiculo, nodo1, nodo2):
-        self.grafos[vehiculo].visitEdge(nodo1, nodo2)
+        distancia, tiempo = self.grafos[vehiculo].visitEdge(nodo1, nodo2)
+        return distancia, tiempo
+
 
     def guardarGrafos(self, directorio = 'grafos', name = 'fig', extension = '.png'):
         directorio = os.path.join(directorio, str(date.today()))

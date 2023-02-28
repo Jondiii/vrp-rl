@@ -1,6 +1,7 @@
 import gym
 from gym import spaces
 import numpy as np
+import pandas as pd
 from rutas import Rutas
 import copy
 
@@ -29,6 +30,9 @@ class VRPEnv(gym.Env):
         self.v_loads = np.zeros(shape=self.nVehiculos) + self.v_maxCapacity
         self.v_speeds = np.zeros(shape=self.nVehiculos) + self.v_speed
 
+        # Cálculo de matrices de distancia
+        self.createMatrixes()
+
         # Tantas acciones como (número de nodos + depot) * número de vehículos
         self.action_space = spaces.Discrete(self.nNodos * self.nVehiculos)
 
@@ -41,7 +45,8 @@ class VRPEnv(gym.Env):
             "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos),
             "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + self.n_maxNodeCapacity),
-            "v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos,), dtype=float)
+            "v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos,), dtype=float),
+            "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos * self.nNodos,), dtype=float)
         })
 
     def step(self, action):
@@ -79,6 +84,9 @@ class VRPEnv(gym.Env):
         # Actualizar posición del vehículo que realice la acción.
         self.v_posicionActual[vehiculo] = action
 
+        # Actualizar las distancias a otros nodos
+        self.n_distances[vehiculo] = self.distanceMatrix[action]
+
         # Actualizar tiempo de recorrido del vehículo que realice la acción
         self.currTime[vehiculo] += tiempo
 
@@ -100,6 +108,11 @@ class VRPEnv(gym.Env):
         self.v_loads = np.zeros(shape=self.nVehiculos,) + self.v_maxCapacity
         self.n_demands = copy.deepcopy(self.n_originalDemands)
         self.currTime = np.zeros(shape=self.nVehiculos, dtype = float)
+
+        self.n_distances = np.zeros(shape = (self.nVehiculos, self.nNodos))
+
+        for i in range(0, self.nVehiculos):
+            self.n_distances[i] = self.distanceMatrix[0]
 
         # Creamos un conjunto de rutas nuevo
         self.rutas = Rutas(self.nVehiculos, self.nNodos, self.n_demands, self.n_coordenadas, self.v_speeds)
@@ -126,7 +139,8 @@ class VRPEnv(gym.Env):
         obs["v_loads"] = self.v_loads
         obs["n_demands"] = self.n_demands   # No sé si tiene mucho sentido pasarle la demanda cuando esta no va a cambiar...
                                             # A no ser que pongamos la demanda de un nodo a 0 cuando esta sea recogida.
-        obs["v_curr_time"] = self.currTime                             
+        obs["v_curr_time"] = self.currTime
+        obs["n_distances"] = self.n_distances.flatten()
 
         return obs
 
@@ -159,6 +173,17 @@ class VRPEnv(gym.Env):
         reward = round(1/abs(distancia), 2)
 
         return reward
+
+
+    def createMatrixes(self):
+        self.distanceMatrix = np.zeros(shape = (self.nNodos, self.nNodos))
+        self.timeMatrix = np.zeros(shape = (self.nNodos, self.nNodos))
+
+        for i in range(0, self.nNodos):
+            for j in range(0, self.nNodos):
+                distance = np.linalg.norm(abs(self.n_coordenadas[j] - self.n_coordenadas[i]))
+                self.distanceMatrix[i][j] = distance
+                self.timeMatrix[i][j] = distance * 60 / 75
 
     # Guarda el último conjunto de grafos completado 
     def render(self):

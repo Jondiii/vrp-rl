@@ -160,7 +160,6 @@ class VRPEnv(gym.Env):
 
         return reward
 
-
     # Guarda el último conjunto de grafos completado 
     def render(self):
         if self.singlePlot:

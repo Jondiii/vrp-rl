@@ -41,7 +41,7 @@ class VRPEnv(gym.Env):
             "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos),
             "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + self.n_maxNodeCapacity),
-            "v_curr_time" : spaces.Box(low = 0, high = 24 * 60, shape = (self.nVehiculos,), dtype=float)
+            "v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos,), dtype=float)
         })
 
     def step(self, action):
@@ -125,7 +125,7 @@ class VRPEnv(gym.Env):
         obs["v_curr_position"] = self.v_posicionActual
         obs["v_loads"] = self.v_loads
         obs["n_demands"] = self.n_demands   # No sé si tiene mucho sentido pasarle la demanda cuando esta no va a cambiar...
-                                        # A no ser que pongamos la demanda de un nodo a 0 cuando esta sea recogida.
+                                            # A no ser que pongamos la demanda de un nodo a 0 cuando esta sea recogida.
         obs["v_curr_time"] = self.currTime                             
 
         return obs
@@ -154,7 +154,7 @@ class VRPEnv(gym.Env):
 
     def getReward(self, distancia):
         if distancia == 0:
-            return 0
+            return 0.0
 
         reward = round(1/abs(distancia), 2)
 
@@ -184,3 +184,10 @@ class VRPEnv(gym.Env):
         action = action % self.nNodos
 
         return str(vehiculo) + "_" + str(action)
+    
+
+    def minToStr(self, time):
+        hora = time / 60
+        minutos = time // 60
+
+        return str(hora) + ":" + str(minutos)

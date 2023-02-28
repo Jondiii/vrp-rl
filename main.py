@@ -13,19 +13,21 @@ if not os.path.exists(models_dir):
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-env = VRPEnv(nVehiculos = 2, nNodos = 10, singlePlot = True)
+env = VRPEnv(nVehiculos = 2, nNodos = 10)
 
 env.reset()
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
-ITERATIONS = 10
-TIMESTEPS = 100
+ITERATIONS = 100
+TIMESTEPS = 1000
 
 start_time = time.time()
+
 for i in range(1, ITERATIONS):
     model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps=False, tb_log_name=ALGORTIHM)
     model.save(f"{models_dir}/{TIMESTEPS*i}")
+
 print("--- %s minutos ---" % ((time.time() - start_time)/60))
 
 env.render()

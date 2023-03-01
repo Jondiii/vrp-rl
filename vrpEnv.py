@@ -8,7 +8,7 @@ import copy
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 30, speed = 70, seed = 6, multiTrip = False, singlePlot = False):        
+    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 30, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False):        
         np.random.seed(seed)
         
         # Características del entorno
@@ -32,6 +32,9 @@ class VRPEnv(gym.Env):
 
         # Cálculo de matrices de distancia
         self.createMatrixes()
+
+        # Creamos las time windows
+        self.crearTW(twMin, twMax)
 
         # Tantas acciones como (número de nodos + depot) * número de vehículos
         self.action_space = spaces.Discrete(self.nNodos * self.nVehiculos)
@@ -129,6 +132,15 @@ class VRPEnv(gym.Env):
         if self.v_loads[vehiculo] - self.n_demands[action] < 0:
             return False
 
+
+        if self.minTW[action] > self.currTime[vehiculo]:
+            #print("MIN: {} - {}".format(self.minTW[action], self.currTime[vehiculo]))
+            return False
+
+        if self.maxTW[action] < self.currTime[vehiculo]:
+            #print("MAX: {} - {}".format(self.maxTW[action], self.currTime[vehiculo]))
+            return False
+
         return True
     
 
@@ -184,6 +196,18 @@ class VRPEnv(gym.Env):
                 distance = np.linalg.norm(abs(self.n_coordenadas[j] - self.n_coordenadas[i]))
                 self.distanceMatrix[i][j] = distance
                 self.timeMatrix[i][j] = distance * 60 / 75
+
+
+    def crearTW(self, twMin, twMax):
+        if twMin is None:
+            self.minTW = np.zeros(shape=self.nNodos)
+        else:
+            self.minTW = np.array(twMin)
+
+        if twMax is None:
+            self.maxTW = np.zeros(shape=self.nNodos) + float('inf')
+        else:
+            self.maxTW = np.array(twMax)
 
     # Guarda el último conjunto de grafos completado 
     def render(self):

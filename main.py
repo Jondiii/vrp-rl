@@ -19,8 +19,8 @@ env.reset()
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
-ITERATIONS = 100
-TIMESTEPS = 1000
+ITERATIONS = 10
+TIMESTEPS = 100
 
 start_time = time.time()
 

@@ -1,0 +1,16 @@
+01/03/2023
+
+ITERATIONS = 100
+TIMESTEPS = 1000
+
+TIEMPO: 8.658899366855621 min
+
+VRPEnv(nVehiculos = 5, nNodos = 20)
+
+Características:
+            "n_visited" 
+            "v_curr_position"
+            "v_loads"
+            "n_demands"
+            "v_curr_time" 
+            "n_distances" --> Distancias que hay desde el nodo en el que está cada vehículo al resto de nodos

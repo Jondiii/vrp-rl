@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 from rutas import Rutas
 import copy
+import os
+from datetime import date
 
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
@@ -225,6 +227,33 @@ class VRPEnv(gym.Env):
             
         else:
             self.rutas.guardarGrafos()
+
+
+    def crearReport(self,directorio = 'reports', name = 'report', extension = '.txt'):
+        directorio = os.path.join(directorio, str(date.today()))
+        
+        if not os.path.exists(directorio):
+            os.makedirs(directorio)
+
+        existentes = os.listdir(directorio)
+        numeros = [int(nombre.split('_')[-1].split('.')[0]) for nombre in existentes
+               if nombre.startswith(name + '_') and nombre.endswith(extension)]
+        siguiente_numero = str(max(numeros) + 1 if numeros else 1)
+
+        nombreDoc = os.path.join(directorio, name + '_' + siguiente_numero + extension)
+
+        with open(nombreDoc, 'w') as f:
+            f.write(str(date.today()))
+            f.write("############")
+            f.write("\nNúmero de vehíclos utilizados: ", self.nVehiculos)
+            f.write("\n")
+
+            for ruta in self.v_recorrido:
+                f.write(ruta)
+
+            f.write(self.currTime)
+
+            f.close()
 
 
     def actionParser(self, action):

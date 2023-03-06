@@ -31,5 +31,5 @@ for i in range(1, ITERATIONS):
 print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))
 
 env.render()
-
+env.crearReport()
 env.close()

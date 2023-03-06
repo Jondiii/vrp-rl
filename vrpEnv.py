@@ -126,6 +126,7 @@ class VRPEnv(gym.Env):
         self.rutas = Rutas(self.nVehiculos, self.nNodos, self.n_demands, self.n_coordenadas, self.v_speeds)
         
         self.v_ordenVisitas = []
+
         for _ in range(self.nVehiculos):
             self.v_ordenVisitas.append([])
         
@@ -241,7 +242,7 @@ class VRPEnv(gym.Env):
             self.rutas.guardarGrafos()
 
 
-    def crearReport(self,directorio = 'reports', name = 'report', extension = '.txt'):
+    def crearReport(self, directorio = 'reports', name = 'report', extension = '.txt'):
         directorio = os.path.join(directorio, str(date.today()))
         
         if not os.path.exists(directorio):
@@ -254,16 +255,15 @@ class VRPEnv(gym.Env):
 
         nombreDoc = os.path.join(directorio, name + '_' + siguiente_numero + extension)
 
-        with open(nombreDoc, 'w') as f:
+        with open(nombreDoc, 'w', encoding="utf-8") as f:
+            f.write("############")
             f.write(str(date.today()))
             f.write("############")
-            f.write("\nNúmero de vehíclos utilizados: ", self.nVehiculos)
+            f.write("\nNúmero de vehíclos utilizados: {}".format(self.nVehiculos))
             f.write("\n")
 
-            for ruta in self.v_recorrido:
-                f.write(ruta)
-
-            f.write(self.currTime)
+            for ruta, tiempo in zip(self.v_ordenVisitas, self.currTime):
+                f.write("\n"+str(ruta) + " - t: " + str(round(tiempo, 2)))
 
             f.close()
 

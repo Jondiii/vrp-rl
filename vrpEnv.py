@@ -4,11 +4,13 @@ import numpy as np
 import pandas as pd
 from rutas import Rutas
 import copy
+import os
+from datetime import date
 
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 30, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False):        
+    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 6, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False):        
         np.random.seed(seed)
         
         # Características del entorno
@@ -20,7 +22,7 @@ class VRPEnv(gym.Env):
 
         # Características de los nodos
         self.n_coordenadas = np.random.rand(nNodos+1, 2) # [0, nNodos), por lo que hay que sumarle +1
-        self.n_originalDemands = np.random.randint(low = 1, high = maxNodeCapacity, size=self.nNodos)
+        self.n_originalDemands = np.random.randint(low = 1, high = maxNodeCapacity, size=self.nNodos) * 5 # Demandas múltiplo de 5
         self.n_demands = copy.deepcopy(self.n_originalDemands)
         self.n_maxNodeCapacity = maxNodeCapacity
 
@@ -47,7 +49,7 @@ class VRPEnv(gym.Env):
             "n_visited" :  spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + 2),
             "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos),
             "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
-            "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + self.n_maxNodeCapacity),
+            "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + self.n_maxNodeCapacity * 5),
             "v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos,), dtype=float),
             "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos * self.nNodos,), dtype=float)
         })
@@ -237,6 +239,33 @@ class VRPEnv(gym.Env):
             
         else:
             self.rutas.guardarGrafos()
+
+
+    def crearReport(self,directorio = 'reports', name = 'report', extension = '.txt'):
+        directorio = os.path.join(directorio, str(date.today()))
+        
+        if not os.path.exists(directorio):
+            os.makedirs(directorio)
+
+        existentes = os.listdir(directorio)
+        numeros = [int(nombre.split('_')[-1].split('.')[0]) for nombre in existentes
+               if nombre.startswith(name + '_') and nombre.endswith(extension)]
+        siguiente_numero = str(max(numeros) + 1 if numeros else 1)
+
+        nombreDoc = os.path.join(directorio, name + '_' + siguiente_numero + extension)
+
+        with open(nombreDoc, 'w') as f:
+            f.write(str(date.today()))
+            f.write("############")
+            f.write("\nNúmero de vehíclos utilizados: ", self.nVehiculos)
+            f.write("\n")
+
+            for ruta in self.v_recorrido:
+                f.write(ruta)
+
+            f.write(self.currTime)
+
+            f.close()
 
 
     def actionParser(self, action):

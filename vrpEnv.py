@@ -87,6 +87,9 @@ class VRPEnv(gym.Env):
         # Actualizar posición del vehículo que realice la acción.
         self.v_posicionActual[vehiculo] = action
 
+        # Añadir el nodo a la ruta del vehículo.
+        self.v_ordenVisitas[vehiculo].append(action)
+
         # Actualizar las distancias a otros nodos
         self.n_distances[vehiculo] = self.distanceMatrix[action]
 
@@ -119,7 +122,11 @@ class VRPEnv(gym.Env):
 
         # Creamos un conjunto de rutas nuevo
         self.rutas = Rutas(self.nVehiculos, self.nNodos, self.n_demands, self.n_coordenadas, self.v_speeds)
-
+        
+        self.v_ordenVisitas = []
+        for _ in range(self.nVehiculos):
+            self.v_ordenVisitas.append([])
+        
         self.done = False
 
         return self.getState()
@@ -208,6 +215,11 @@ class VRPEnv(gym.Env):
             self.maxTW = np.zeros(shape=self.nNodos) + float('inf')
         else:
             self.maxTW = np.array(twMax)
+
+
+    def padder(self):
+        temp = np.array(self.v_ordenVisitas)
+
 
     # Guarda el último conjunto de grafos completado 
     def render(self):

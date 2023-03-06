@@ -19,8 +19,8 @@ env.reset()
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
-ITERATIONS = 10
-TIMESTEPS = 100
+ITERATIONS = 100
+TIMESTEPS = 1000
 
 start_time = time.time()
 
@@ -31,5 +31,5 @@ for i in range(1, ITERATIONS):
 print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))
 
 env.render()
-env.crearReport()
+
 env.close()

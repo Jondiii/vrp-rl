@@ -128,7 +128,7 @@ class VRPEnv(gym.Env):
         self.v_ordenVisitas = []
 
         for _ in range(self.nVehiculos):
-            self.v_ordenVisitas.append([])
+            self.v_ordenVisitas.append([0])
         
         self.done = False
 
@@ -173,13 +173,18 @@ class VRPEnv(gym.Env):
 
             if allVisited:
                 self.grafoCompletado = copy.deepcopy(self.rutas)
+                self.ordenVisitasCompletas = copy.deepcopy(self.v_ordenVisitas)
+                self.tiempoFinal = copy.deepcopy(self.currTime)
                 return True
-
+            
         if np.all(self.v_posicionActual == 0):
             allVisited = np.all(self.visited == 1)
             if allVisited:
                 self.grafoCompletado = copy.deepcopy(self.rutas)
+                self.ordenVisitasCompletas = copy.deepcopy(self.v_ordenVisitas)
+                self.tiempoFinal = copy.deepcopy(self.currTime)
                 return True
+            
         else:
             allVisited = np.all(self.visited == 1)
             if allVisited:
@@ -232,6 +237,8 @@ class VRPEnv(gym.Env):
         else:
             self.grafoCompletado.guardarGrafos()
 
+        self.crearReport(self.ordenVisitasCompletas, self.tiempoFinal)
+
 
     # Guarda el conjunto actual de grafos, independientemente de si están completos o no
     def render2(self):
@@ -240,9 +247,11 @@ class VRPEnv(gym.Env):
             
         else:
             self.rutas.guardarGrafos()
+        
+        self.crearReport(self.v_ordenVisitas, self.currTime)
 
 
-    def crearReport(self, directorio = 'reports', name = 'report', extension = '.txt'):
+    def crearReport(self, v_ordenVisitas, currTime, directorio = 'reports', name = 'report', extension = '.txt'):
         directorio = os.path.join(directorio, str(date.today()))
         
         if not os.path.exists(directorio):
@@ -255,15 +264,20 @@ class VRPEnv(gym.Env):
 
         nombreDoc = os.path.join(directorio, name + '_' + siguiente_numero + extension)
 
+        tiempoTotal = 0
+
         with open(nombreDoc, 'w', encoding="utf-8") as f:
             f.write("############")
             f.write(str(date.today()))
             f.write("############")
-            f.write("\nNúmero de vehíclos utilizados: {}".format(self.nVehiculos))
+            f.write("\n\nNúmero de vehíclos utilizados: {}".format(self.nVehiculos))
             f.write("\n")
 
-            for ruta, tiempo in zip(self.v_ordenVisitas, self.currTime):
-                f.write("\n"+str(ruta) + " - t: " + str(round(tiempo, 2)))
+            for ruta, tiempo in zip(v_ordenVisitas, currTime):
+                tiempoTotal += tiempo
+                f.write("\n"+str(ruta) + " - t: " + str(round(tiempo, 2)) + " min")
+
+            f.write("\n\nTiempo total: " + str(round(tiempoTotal, 2)) + " min")
 
             f.close()
 

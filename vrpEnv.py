@@ -18,7 +18,7 @@ class VRPEnv(gym.Env):
         self.singlePlot = singlePlot
         self.nNodos = nNodos + 1 # +1 del depot
         self.nVehiculos = nVehiculos
-        self.currTime = np.zeros(shape=self.nVehiculos)
+        self.currTime = np.zeros(shape=(self.nVehiculos,1))
 
         # Características de los nodos
         self.n_coordenadas = np.random.rand(nNodos+1, 2) # [0, nNodos), por lo que hay que sumarle +1
@@ -51,8 +51,10 @@ class VRPEnv(gym.Env):
             "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + self.n_maxNodeCapacity * 5),
             "v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos,), dtype=float),
-            "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos * self.nNodos,), dtype=float)
+            "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos * self.nNodos,), dtype=float),
+            "n_timeLeftTWClose" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos * self.nNodos,), dtype=float)
         })
+
 
     def step(self, action):
         # supongamos que nNodos = 6, nVehiculos = 2 y action = 6 * 2 + 2
@@ -115,7 +117,7 @@ class VRPEnv(gym.Env):
         self.v_posicionActual = np.zeros(shape = self.nVehiculos)
         self.v_loads = np.zeros(shape=self.nVehiculos,) + self.v_maxCapacity
         self.n_demands = copy.deepcopy(self.n_originalDemands)
-        self.currTime = np.zeros(shape=self.nVehiculos, dtype = float)
+        self.currTime = np.zeros(shape=(self.nVehiculos), dtype = float)
 
         self.n_distances = np.zeros(shape = (self.nVehiculos, self.nNodos))
 
@@ -164,6 +166,8 @@ class VRPEnv(gym.Env):
         obs["v_curr_time"] = self.currTime
         obs["n_distances"] = self.n_distances.flatten()
 
+        obs["n_timeLeftTWClose"] = self.getTimeLeftTWClose().flatten()
+
         return obs
 
 
@@ -200,6 +204,14 @@ class VRPEnv(gym.Env):
         reward = round(1/abs(distancia), 2)
 
         return reward
+        
+    # Current time tiene shape (nVehiculos,), mientras que el repeat devuelve shape (nNodos, nvehiculos)
+    # No se puede hacer broadcast de esos rangos, pero con np.array([self.currTime]).T tenemos que curr time tiene shape (nVehiculos,1)
+    # y con eso sí se puede hacer la resta que queremos
+    def getTimeLeftTWClose(self):
+        twClose = np.repeat([self.maxTW], repeats=self.nVehiculos, axis=0) - np.array([self.currTime]).T
+
+        return twClose
 
 
     def createMatrixes(self):
@@ -217,16 +229,13 @@ class VRPEnv(gym.Env):
         if twMin is None:
             self.minTW = np.zeros(shape=self.nNodos)
         else:
-            self.minTW = np.array(twMin)
+            self.minTW = np.zeros(shape=self.nNodos) + twMin
 
         if twMax is None:
             self.maxTW = np.zeros(shape=self.nNodos) + float('inf')
         else:
-            self.maxTW = np.array(twMax)
+            self.maxTW = np.zeros(shape=self.nNodos) + twMax
 
-
-    def padder(self):
-        temp = np.array(self.v_ordenVisitas)
 
 
     # Guarda el último conjunto de grafos completado 

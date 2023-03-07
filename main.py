@@ -13,14 +13,14 @@ if not os.path.exists(models_dir):
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-env = VRPEnv(nVehiculos = 5, nNodos = 20)
+env = VRPEnv(nVehiculos = 5, nNodos = 20, twMax = 20)
 
 env.reset()
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
-ITERATIONS = 100
-TIMESTEPS = 1000
+ITERATIONS = 10
+TIMESTEPS = 100
 
 start_time = time.time()
 

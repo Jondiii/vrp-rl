@@ -141,6 +141,9 @@ class VRPEnv(gym.Env):
         if self.visited[action] == 1:
             return False
         
+        if self.v_posicionActual[vehiculo] == action:
+            return False
+        
         if self.v_loads[vehiculo] - self.n_demands[action] < 0:
             return False
 

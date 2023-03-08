@@ -235,7 +235,7 @@ class VRPEnv(gym.Env):
             self.minTW = np.zeros(shape=self.nNodos) + twMin
 
         if twMax is None:
-            self.maxTW = np.zeros(shape=self.nNodos) + float('inf')
+            self.maxTW = np.zeros(shape=self.nNodos) + 100000 # No deja poner inf, tensorflow lo interpreta como nan
         else:
             self.maxTW = np.zeros(shape=self.nNodos) + twMax
 

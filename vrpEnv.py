@@ -10,27 +10,32 @@ from datetime import date
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos, nNodos, maxCapacity = 100, maxNodeCapacity = 6, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False):        
+    def __init__(self, nVehiculos, nNodos, maxNumVehiculos = 50, maxNumNodos = 100, maxCapacity = 100, maxNodeCapacity = 6, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False):        
         np.random.seed(seed)
         
+        self.maxNumVehiculos = maxNumVehiculos
+        self.maxNumNodos = maxNumNodos + 1
+
         # Características del entorno
         self.multiTrip = multiTrip
         self.singlePlot = singlePlot
         self.nNodos = nNodos + 1 # +1 del depot
         self.nVehiculos = nVehiculos
-        self.currTime = np.zeros(shape=(self.nVehiculos,1))
+        self.currTime = np.zeros(shape=(self.maxNumVehiculos,1))
+
+
 
         # Características de los nodos
-        self.n_coordenadas = np.random.rand(nNodos+1, 2) # [0, nNodos), por lo que hay que sumarle +1
-        self.n_originalDemands = np.random.randint(low = 1, high = maxNodeCapacity, size=self.nNodos) * 5 # Demandas múltiplo de 5
+        self.n_coordenadas = np.random.rand(maxNumNodos+1, 2) # [0, nNodos), por lo que hay que sumarle +1
+        self.n_originalDemands = np.random.randint(low = 1, high = maxNodeCapacity, size=self.maxNumNodos) * 5 # Demandas múltiplo de 5
         self.n_demands = copy.deepcopy(self.n_originalDemands)
         self.n_maxNodeCapacity = maxNodeCapacity
 
         # Características de los vehículos
         self.v_maxCapacity = maxCapacity
         self.v_speed = speed
-        self.v_loads = np.zeros(shape=self.nVehiculos) + self.v_maxCapacity
-        self.v_speeds = np.zeros(shape=self.nVehiculos) + self.v_speed
+        self.v_loads = np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity
+        self.v_speeds = np.zeros(shape=self.maxNumVehiculos) + self.v_speed
 
         # Cálculo de matrices de distancia
         self.createMatrixes()
@@ -39,24 +44,27 @@ class VRPEnv(gym.Env):
         self.crearTW(twMin, twMax)
 
         # Tantas acciones como (número de nodos + depot) * número de vehículos
-        self.action_space = spaces.Discrete(self.nNodos * self.nVehiculos)
+        self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos)
 
         # Aquí se define cómo serán las observaciones que se pasarán al agente.
         # Se usa multidiscrete para datos que vengan en formato array. Hay que definir el tamaño de estos arrays
         # y sus valores máximos. La primera, "visited", podrá tomar un máximo de 2 valores en cada posición del array
         # (1 visitado - 0 sin visitar), por lo que le pasamos un array [2,2,...,2]
         self.observation_space = spaces.Dict({
-            "n_visited" :  spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + 2),
-            "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.nNodos),
-            "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.nVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
-            "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.nNodos) + self.n_maxNodeCapacity * 5),
-            "v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos,), dtype=float),
-            "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos * self.nNodos,), dtype=float),
-            "n_timeLeftTWClose" : spaces.Box(low = 0, high = float('inf'), shape = (self.nVehiculos * self.nNodos,), dtype=float)
+            "n_visited" :  spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + 2), # TODO: poner como multi binary??
+            "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.maxNumNodos),
+            "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
+            "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
+            "v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
+            "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
+            "n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float)
         })
 
 
     def step(self, action):
+        if action > self.nNodos:
+            return self.getState(), -1, False, dict(info = "Acción rechazada por actuar sobre un nodo no disponible.", accion = action, nNodos = self.nNodos)
+        
         # supongamos que nNodos = 6, nVehiculos = 2 y action = 6 * 2 + 2
         # Calculamos el vehículo que realiza la acción
         vehiculo = action // self.nNodos
@@ -108,24 +116,29 @@ class VRPEnv(gym.Env):
 
     def reset(self):
         self.visited = np.zeros(shape=(self.nNodos))
+        self.visited = np.pad(self.visited, (0,self.maxNumNodos - self.nNodos), 'constant', constant_values = 1)
 
         if self.multiTrip:
             self.visited[0] = 0
         else:
             self.visited[0] = 1 # El depot comienza como visitado
 
-        self.v_posicionActual = np.zeros(shape = self.nVehiculos)
+        self.v_posicionActual = np.zeros(shape = self.maxNumVehiculos)
+
         self.v_loads = np.zeros(shape=self.nVehiculos,) + self.v_maxCapacity
+        self.v_loads = np.pad(self.v_loads, (0, self.maxNumVehiculos - self.nVehiculos), 'constant', constant_values = 0)
+
         self.n_demands = copy.deepcopy(self.n_originalDemands)
         self.currTime = np.zeros(shape=(self.nVehiculos), dtype = float)
+        self.currTime = np.pad(self.currTime, (0, self.maxNumVehiculos - self.nVehiculos), 'constant', constant_values = 999)
 
-        self.n_distances = np.zeros(shape = (self.nVehiculos, self.nNodos))
+        self.n_distances = np.zeros(shape = (self.maxNumVehiculos, self.maxNumNodos))
 
-        for i in range(0, self.nVehiculos):
+        for i in range(0, self.maxNumVehiculos):
             self.n_distances[i] = self.distanceMatrix[0]
 
         # Creamos un conjunto de rutas nuevo
-        self.rutas = Rutas(self.nVehiculos, self.nNodos, self.n_demands, self.n_coordenadas, self.v_speeds)
+        self.rutas = Rutas(self.nVehiculos, self.nNodos, self.maxNumVehiculos, self.maxNumNodos, self.n_demands, self.n_coordenadas, self.v_speeds)
         
         self.v_ordenVisitas = []
 
@@ -212,17 +225,17 @@ class VRPEnv(gym.Env):
     # No se puede hacer broadcast de esos rangos, pero con np.array([self.currTime]).T tenemos que curr time tiene shape (nVehiculos,1)
     # y con eso sí se puede hacer la resta que queremos
     def getTimeLeftTWClose(self):
-        twClose = np.repeat([self.maxTW], repeats=self.nVehiculos, axis=0) - np.array([self.currTime]).T
+        twClose = np.repeat([self.maxTW], repeats=self.maxNumVehiculos, axis=0) - np.array([self.currTime]).T
 
         return twClose
 
 
     def createMatrixes(self):
-        self.distanceMatrix = np.zeros(shape = (self.nNodos, self.nNodos))
-        self.timeMatrix = np.zeros(shape = (self.nNodos, self.nNodos))
+        self.distanceMatrix = np.zeros(shape = (self.maxNumNodos, self.maxNumNodos))
+        self.timeMatrix = np.zeros(shape = (self.maxNumNodos, self.maxNumNodos))
 
-        for i in range(0, self.nNodos):
-            for j in range(0, self.nNodos):
+        for i in range(0, self.maxNumNodos):
+            for j in range(0, self.maxNumNodos):
                 distance = np.linalg.norm(abs(self.n_coordenadas[j] - self.n_coordenadas[i]))
                 self.distanceMatrix[i][j] = distance
                 self.timeMatrix[i][j] = distance * 60 / 75
@@ -230,14 +243,14 @@ class VRPEnv(gym.Env):
 
     def crearTW(self, twMin, twMax):
         if twMin is None:
-            self.minTW = np.zeros(shape=self.nNodos)
+            self.minTW = np.zeros(shape=self.maxNumNodos)
         else:
-            self.minTW = np.zeros(shape=self.nNodos) + twMin
+            self.minTW = np.zeros(shape=self.maxNumNodos) + twMin
 
         if twMax is None:
-            self.maxTW = np.zeros(shape=self.nNodos) + 100000 # No deja poner inf, tensorflow lo interpreta como nan
+            self.maxTW = np.zeros(shape=self.maxNumNodos) + 100000 # No deja poner inf, tensorflow lo interpreta como nan
         else:
-            self.maxTW = np.zeros(shape=self.nNodos) + twMax
+            self.maxTW = np.zeros(shape=self.maxNumNodos) + twMax
 
 
 

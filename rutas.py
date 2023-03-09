@@ -5,20 +5,23 @@ import matplotlib.pyplot as plt
 import os
 
 class Rutas:
-    def __init__(self, nVehiculos, nNodos, demands, coordenadas, speeds, drawDemand = True):
+    def __init__(self, nVehiculos, nNodos, maxNumVehiculos, maxNumNodos, demands, coordenadas, speeds, drawDemand = True):
         self.grafos = []
 
         self.nNodos = nNodos
         self.nVehiculos = nVehiculos
-        self.demands = demands
-        self.coordenadas = coordenadas
-        self.speeds = speeds
+        self.maxNumVehiculos = maxNumVehiculos
+        self.maxNumNodos = maxNumNodos
+        self.demands = demands[:nNodos]
+        self.coordenadas = coordenadas[:nNodos]
+        self.speeds = speeds[:nVehiculos]
         self.drawDemand = drawDemand
 
         self.crearGrafos()
 
 
     def crearGrafos(self):
+
         for i in range(self.nVehiculos):
             self.grafos.append(Grafo(self.nNodos, self.demands, self.coordenadas, self.speeds[i], self.drawDemand))
 

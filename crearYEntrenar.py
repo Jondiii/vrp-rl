@@ -1,4 +1,5 @@
-from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3 import PPO, DQN
 from vrpEnv import VRPEnv
 import os
 import time
@@ -14,16 +15,17 @@ if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
 
-env = VRPEnv(nVehiculos = 50, nNodos = 100)
+env = VRPEnv(nVehiculos = 5, nNodos = 20, sameMaxNodeVehicles = True)
 env.reset()
 
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
 
-ITERATIONS = 10
-TIMESTEPS = 10000
+ITERATIONS = 100
+TIMESTEPS = 100000
 
+#checkpoint_callback = CheckpointCallback(save_freq=1000, save_path=models_dir)
 
 start_time = time.time()
 

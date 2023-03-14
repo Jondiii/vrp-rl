@@ -10,11 +10,16 @@ from datetime import date
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos, nNodos, maxNumVehiculos = 50, maxNumNodos = 100, maxCapacity = 100, maxNodeCapacity = 6, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False):        
+    def __init__(self, nVehiculos, nNodos, maxNumVehiculos = 50, maxNumNodos = 100, maxCapacity = 100, maxNodeCapacity = 6, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False, sameMaxNodeVehicles = False):
         np.random.seed(seed)
         
-        self.maxNumVehiculos = maxNumVehiculos
-        self.maxNumNodos = maxNumNodos + 1
+        if sameMaxNodeVehicles:
+            self.maxNumVehiculos = nVehiculos
+            self.maxNumNodos = nNodos + 1
+
+        else:
+            self.maxNumVehiculos = maxNumVehiculos
+            self.maxNumNodos = maxNumNodos + 1
 
         # Características del entorno
         self.multiTrip = multiTrip
@@ -26,7 +31,7 @@ class VRPEnv(gym.Env):
 
 
         # Características de los nodos
-        self.n_coordenadas = np.random.rand(maxNumNodos+1, 2) # [0, nNodos), por lo que hay que sumarle +1
+        self.n_coordenadas = np.random.rand(self.maxNumNodos, 2) # [0, nNodos), por lo que hay que sumarle +1
         self.n_originalDemands = np.random.randint(low = 1, high = maxNodeCapacity, size=self.maxNumNodos) * 5 # Demandas múltiplo de 5
         self.n_demands = copy.deepcopy(self.n_originalDemands)
         self.n_maxNodeCapacity = maxNodeCapacity
@@ -57,19 +62,18 @@ class VRPEnv(gym.Env):
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
             "v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
             "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
-            "n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float)
+            "n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float) # Con DQN hay que comentar esta línea
         })
 
 
     def step(self, action):
-        if action > self.nNodos:
+        if action >= self.nNodos * self.nVehiculos:
             return self.getState(), -1, False, dict(info = "Acción rechazada por actuar sobre un nodo no disponible.", accion = action, nNodos = self.nNodos)
         
         # supongamos que nNodos = 6, nVehiculos = 2 y action = 6 * 2 + 2
         # Calculamos el vehículo que realiza la acción
         vehiculo = action // self.nNodos
         # vehiculo = 1, es decir, el segundo vehículo
-
         action = action % self.nNodos
         # action = 14   %  6 = 2 # Sería visitar el tercer nodo
 
@@ -94,7 +98,7 @@ class VRPEnv(gym.Env):
         self.n_demands[action] = 0
         
         # Calcular la recompensa. Será inversamente proporcional a la distancia recorrida. 
-        reward = self.getReward(distancia)
+        reward = self.getReward(distancia, action, vehiculo)
 
         # Actualizar posición del vehículo que realice la acción.
         self.v_posicionActual[vehiculo] = action
@@ -213,11 +217,15 @@ class VRPEnv(gym.Env):
         return False
     
 
-    def getReward(self, distancia):
+    def getReward(self, distancia, action, vehicle):
         if distancia == 0:
             return 0.0
 
         reward = round(1/abs(distancia), 2)
+
+        if self.visited[0] == 0:
+            reward += 50 - np.sum(self.v_posicionActual) # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
+
 
         return reward
         

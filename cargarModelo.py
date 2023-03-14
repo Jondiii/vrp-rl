@@ -5,13 +5,13 @@ import time
 
 ALGORTIHM = "PPO"
 
-model_name = "modelo"
+model_name = "100000"
 
-#models_dir = "models/" + ALGORTIHM
-models_dir = "Resultados/Prueba_003"
+models_dir = "models/" + ALGORTIHM
+#models_dir = "Resultados/Prueba_003"
 model_path = f"{models_dir}/{model_name}"
 
-env = VRPEnv(nVehiculos = 5, nNodos = 20, twMax = 20)
+env = VRPEnv(nVehiculos = 3, nNodos = 10, maxNumNodos=20, maxNumVehiculos=5)
 
 env.reset()
 

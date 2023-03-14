@@ -1,0 +1,11 @@
+14/03/2023
+
+ITERATIONS = 100
+TIMESTEPS = 100000
+
+TIEMPO: detenido antes de tiempo
+
+VRPEnv(nVehiculos = 5, nNodos = 20, sameMaxNodeVehicles = True)
+
+CAMBIOS:
+    - Añadidas variables "número máximo de vehículo" y "número máximo de nodos". Se puede usar un modelo entrenado para resolver problemas con menos vehículos y/o menos nodos.

@@ -12,5 +12,6 @@ CAMBIOS:
         - Problema: en el caso de esta prueba, había 5050 acciones posibles, lo que hace que los primeros momentos de aprendizaje sean complicados de realizar.
         - Ideas: intentar guiar mejor al algoritmo en los primeros pasos? Aún así intentará explorar bastante. Igual se puede cambiar algún parámetro de aprendizaje...
 
-NOTA:
+NOTAS:
     - Se ha usado multiTrip=True porque sin eso la gráfica del aprendizaje era incluso más recta.
+    - No usado: if depot == 0 then reward += np.sum(self.v_posicionActual)

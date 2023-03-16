@@ -151,6 +151,7 @@ class VRPEnv(gym.Env):
             self.n_distances[i] = self.distanceMatrix[0]
 
         # Creamos un conjunto de rutas nuevo
+
         self.rutas = Rutas(self.nVehiculos, self.nNodos, self.maxNumVehiculos, self.maxNumNodos, self.n_demands, self.n_coordenadas, self.v_speeds)
         
         self.v_ordenVisitas = []
@@ -286,7 +287,8 @@ class VRPEnv(gym.Env):
 
     def loadData(self):
         # Características de los nodos
-        self.n_coordenadas = np.array(self.dataGen.nodeInfo["coordenadas_X"], self.dataGen.nodeInfo["coordenadas_Y"]).T
+        self.n_coordenadas = np.array([self.dataGen.nodeInfo["coordenadas_X"], self.dataGen.nodeInfo["coordenadas_Y"]]).T
+
         self.n_originalDemands = self.dataGen.nodeInfo["demandas"].to_numpy()
         self.n_demands = copy.deepcopy(self.n_originalDemands)
         #self.n_maxNodeCapacity = self.dataGen.nodeInfo["maxDemand"].to_numpy()  # TODO

@@ -10,9 +10,12 @@ from datetime import date
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos, nNodos, maxNumVehiculos = 50, maxNumNodos = 100, maxCapacity = 100, maxNodeCapacity = 6, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False, sameMaxNodeVehicles = False):
+    def __init__(self, nVehiculos, nNodos, maxNumVehiculos = 50, maxNumNodos = 100, maxCapacity = 100, maxNodeCapacity = 6, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False, sameMaxNodeVehicles = False, dataPath = None):
         np.random.seed(seed)
         
+        if dataPath is None:
+            self.generateRandomData()
+
         if sameMaxNodeVehicles:
             self.maxNumVehiculos = nVehiculos
             self.maxNumNodos = nNodos + 1
@@ -118,6 +121,7 @@ class VRPEnv(gym.Env):
         return self.getState(), reward, done, dict()
 
 
+
     def reset(self):
         self.visited = np.zeros(shape=(self.nNodos))
         self.visited = np.pad(self.visited, (0,self.maxNumNodos - self.nNodos), 'constant', constant_values = 1)
@@ -154,6 +158,7 @@ class VRPEnv(gym.Env):
         return self.getState()
 
 
+
     def checkAction(self, action, vehiculo):
         if self.visited[action] == 1:
             return False
@@ -163,7 +168,6 @@ class VRPEnv(gym.Env):
         
         if self.v_loads[vehiculo] - self.n_demands[action] < 0:
             return False
-
 
         if self.minTW[action] > self.currTime[vehiculo]:
             #print("MIN: {} - {}".format(self.minTW[action], self.currTime[vehiculo]))
@@ -176,19 +180,19 @@ class VRPEnv(gym.Env):
         return True
     
 
+
     def getState(self):
         obs = dict()
         obs["n_visited"] = self.visited
         obs["v_curr_position"] = self.v_posicionActual
         obs["v_loads"] = self.v_loads
-        obs["n_demands"] = self.n_demands   # No sé si tiene mucho sentido pasarle la demanda cuando esta no va a cambiar...
-                                            # A no ser que pongamos la demanda de un nodo a 0 cuando esta sea recogida.
+        obs["n_demands"] = self.n_demands 
         obs["v_curr_time"] = self.currTime
         obs["n_distances"] = self.n_distances.flatten()
-
         obs["n_timeLeftTWClose"] = self.getTimeLeftTWClose().flatten()
 
         return obs
+
 
 
     def isDone(self): # can't DO: cambiar esto de orden, primero comprobar vehículo y después nodos --> no se puede por lo de marcar el depot como no visitado
@@ -217,6 +221,7 @@ class VRPEnv(gym.Env):
         return False
     
 
+
     def getReward(self, distancia, action, vehicle):
         if distancia == 0:
             return 0.0
@@ -224,11 +229,13 @@ class VRPEnv(gym.Env):
         reward = round(1/abs(distancia), 2)
 
         if self.visited[0] == 0:
-            reward += 50 - np.sum(self.v_posicionActual) # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
-
-
-        return reward
+            #reward += np.sum(self.v_posicionActual) # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
+            pass
         
+        return reward
+
+
+
     # Current time tiene shape (nVehiculos,), mientras que el repeat devuelve shape (nNodos, nvehiculos)
     # No se puede hacer broadcast de esos rangos, pero con np.array([self.currTime]).T tenemos que curr time tiene shape (nVehiculos,1)
     # y con eso sí se puede hacer la resta que queremos
@@ -236,6 +243,7 @@ class VRPEnv(gym.Env):
         twClose = np.repeat([self.maxTW], repeats=self.maxNumVehiculos, axis=0) - np.array([self.currTime]).T
 
         return twClose
+
 
 
     def createMatrixes(self):
@@ -247,6 +255,7 @@ class VRPEnv(gym.Env):
                 distance = np.linalg.norm(abs(self.n_coordenadas[j] - self.n_coordenadas[i]))
                 self.distanceMatrix[i][j] = distance
                 self.timeMatrix[i][j] = distance * 60 / 75
+
 
 
     def crearTW(self, twMin, twMax):
@@ -261,6 +270,18 @@ class VRPEnv(gym.Env):
             self.maxTW = np.zeros(shape=self.maxNumNodos) + twMax
 
 
+
+    def loadData(self, dataPath):
+        if dataPath is None:
+            self.generateRandomData()
+
+        else:
+            pass
+
+
+
+    def generateRandomData(self):
+        pass
 
     # Guarda el último conjunto de grafos completado 
     def render(self):

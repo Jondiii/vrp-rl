@@ -6,15 +6,15 @@ from rutas import Rutas
 import copy
 import os
 from datetime import date
+import time
+from dataGenerator import DataGenerator
+
 
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     def __init__(self, nVehiculos, nNodos, maxNumVehiculos = 50, maxNumNodos = 100, maxCapacity = 100, maxNodeCapacity = 6, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False, sameMaxNodeVehicles = False, dataPath = None):
         np.random.seed(seed)
-        
-        if dataPath is None:
-            self.generateRandomData()
 
         if sameMaxNodeVehicles:
             self.maxNumVehiculos = nVehiculos
@@ -24,6 +24,11 @@ class VRPEnv(gym.Env):
             self.maxNumVehiculos = maxNumVehiculos
             self.maxNumNodos = maxNumNodos + 1
 
+
+        self.dataGen = DataGenerator(self.maxNumNodos, self.maxNumVehiculos)
+
+        #self.loadData()
+
         # Características del entorno
         self.multiTrip = multiTrip
         self.singlePlot = singlePlot
@@ -31,25 +36,25 @@ class VRPEnv(gym.Env):
         self.nVehiculos = nVehiculos
         self.currTime = np.zeros(shape=(self.maxNumVehiculos,1))
 
-
-
         # Características de los nodos
-        self.n_coordenadas = np.random.rand(self.maxNumNodos, 2) # [0, nNodos), por lo que hay que sumarle +1
-        self.n_originalDemands = np.random.randint(low = 1, high = maxNodeCapacity, size=self.maxNumNodos) * 5 # Demandas múltiplo de 5
-        self.n_demands = copy.deepcopy(self.n_originalDemands)
         self.n_maxNodeCapacity = maxNodeCapacity
+        self.twMin = twMin
+        self.twMax = twMax
 
         # Características de los vehículos
         self.v_maxCapacity = maxCapacity
         self.v_speed = speed
-        self.v_loads = np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity
-        self.v_speeds = np.zeros(shape=self.maxNumVehiculos) + self.v_speed
+
+        if dataPath is None:
+            self.generateRandomData()
+        
+        self.loadData()
 
         # Cálculo de matrices de distancia
         self.createMatrixes()
 
         # Creamos las time windows
-        self.crearTW(twMin, twMax)
+        # self.crearTW(twMin, twMax)
 
         # Tantas acciones como (número de nodos + depot) * número de vehículos
         self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos)
@@ -72,7 +77,7 @@ class VRPEnv(gym.Env):
     def step(self, action):
         if action >= self.nNodos * self.nVehiculos:
             return self.getState(), -1, False, dict(info = "Acción rechazada por actuar sobre un nodo no disponible.", accion = action, nNodos = self.nNodos)
-        
+
         # supongamos que nNodos = 6, nVehiculos = 2 y action = 6 * 2 + 2
         # Calculamos el vehículo que realiza la acción
         vehiculo = action // self.nNodos
@@ -83,7 +88,7 @@ class VRPEnv(gym.Env):
         # Comprobar si la acción es válida
         if not self.checkAction(action, vehiculo):
             return self.getState(), -1, False, dict()
-        
+
         # Eliminar el lugar que se acaba de visitar de las posibles acciones
         self.visited[action] = 1
 
@@ -217,7 +222,7 @@ class VRPEnv(gym.Env):
             allVisited = np.all(self.visited == 1)
             if allVisited:
                 self.visited[0] = 0 
-        
+    
         return False
     
 
@@ -271,17 +276,31 @@ class VRPEnv(gym.Env):
 
 
 
-    def loadData(self, dataPath):
-        if dataPath is None:
-            self.generateRandomData()
-
-        else:
-            pass
-
-
-
     def generateRandomData(self):
-        pass
+        self.dataGen.addNodeInfo(self.n_maxNodeCapacity, self.twMin, self.twMin)
+        self.dataGen.generateNodeInfo()
+        self.dataGen.addVehicleInfo(self.v_maxCapacity, self.v_speed)
+        self.dataGen.generateVehicleInfo()
+        self.dataGen.saveData()
+
+
+    def loadData(self):
+        # Características de los nodos
+        self.n_coordenadas = np.array(self.dataGen.nodeInfo["coordenadas_X"], self.dataGen.nodeInfo["coordenadas_Y"]).T
+        self.n_originalDemands = self.dataGen.nodeInfo["demandas"].to_numpy()
+        self.n_demands = copy.deepcopy(self.n_originalDemands)
+        #self.n_maxNodeCapacity = self.dataGen.nodeInfo["maxDemand"].to_numpy()  # TODO
+
+        # Características de los vehículos
+        #self.v_maxCapacity = self.dataGen.vehicleInfo["maxCapacity"].to_numpy() # TODO
+        #self.v_speed = self.dataGen.vehicleInfo["speed"].to_numpy()             # TODO
+        self.v_loads = self.dataGen.vehicleInfo["maxCapacity"].to_numpy()
+        self.v_speeds = self.dataGen.vehicleInfo["speed"].to_numpy()
+
+        self.minTW = self.dataGen.nodeInfo["minTW"].to_numpy()
+        self.maxTW = self.dataGen.nodeInfo["maxTW"].to_numpy()
+
+
 
     # Guarda el último conjunto de grafos completado 
     def render(self):

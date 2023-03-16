@@ -58,6 +58,7 @@ class Grafo:
             return node["visited"]
 
         # Primero dibujamos los nodos
+
         nx.draw_networkx_nodes(
             self.graph,
             posicion,

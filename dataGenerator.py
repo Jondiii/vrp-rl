@@ -10,8 +10,10 @@ class DataGenerator:
                  dataPath = "data",
                  nodeFile = "nodes.csv",
                  vehicleFile = "vehicles.csv",
+                 seed = 6
                  ):
-    
+        
+        np.random.seed(seed)
         if not os.path.exists(dataPath):
             os.makedirs(dataPath)
 
@@ -44,9 +46,10 @@ class DataGenerator:
         self.nodeInfo["coordenadas_Y"] = np.random.rand(self.numNodos)
         
         self.nodeInfo["demandas"] = (np.random.randint(low = 1, high = self.n_MaxDemands, size =  self.numNodos) * 5)
+        self.nodeInfo["maxDemand"] = self.n_MaxDemands * 5
 
         self.nodeInfo["minTW"] = 0 if self.n_twMin is None else self.n_twMin
-        self.nodeInfo["maxTW"] = 0 if self.n_twMax is None else self.n_twMax
+        self.nodeInfo["maxTW"] = 100000 if self.n_twMax is None else self.n_twMax
 
 
     def generateVehicleInfo(self):
@@ -76,3 +79,7 @@ if __name__ == "__main__":
     dataGen.addVehicleInfo()
     dataGen.generateVehicleInfo()
     dataGen.saveData()
+    prueba = np.array([dataGen.nodeInfo["coordenadas_X"], dataGen.nodeInfo["coordenadas_Y"]])
+    prueba2 = dataGen.nodeInfo["demandas"].to_numpy()
+    print(prueba2)
+

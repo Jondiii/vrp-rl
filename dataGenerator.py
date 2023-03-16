@@ -76,4 +76,3 @@ if __name__ == "__main__":
     dataGen.addVehicleInfo()
     dataGen.generateVehicleInfo()
     dataGen.saveData()
-

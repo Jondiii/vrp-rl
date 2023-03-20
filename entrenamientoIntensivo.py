@@ -20,15 +20,29 @@ v_speed = 70
 
 dataFolder = "data/intensivo"
 
+
+ALGORTIHM = "PPO"
+models_dir = "models/" + ALGORTIHM
+log_dir = "logs"
+
+if not os.path.exists(models_dir):
+    os.makedirs(models_dir)
+
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+
 for i in range(numCasos):
     dataPath = os.path.join(dataFolder, "case" + str(i+1))
-    dataGen = DataGenerator(numNodos, numVehiculos, dataPath, seed = i) # La i es la semilla
+    dataGen = DataGenerator(numNodos + 1, numVehiculos, dataPath, seed = i) # La i es la semilla
     
     dataGen.addNodeInfo(n_maxDemand, n_twMin, n_twMax)
     dataGen.addVehicleInfo(v_maxDemads, v_speed)
     dataGen.generateNodeInfo()
     dataGen.generateVehicleInfo()
     dataGen.saveData()
+
+
 
 """
 

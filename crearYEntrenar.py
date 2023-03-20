@@ -15,15 +15,16 @@ if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
 
-env = VRPEnv(nVehiculos = 50, nNodos = 100, sameMaxNodeVehicles = True)
+env = VRPEnv()
+env.readEnvFromFile(5, 10, "data")
 env.reset()
 
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
 
-ITERATIONS = 100
-TIMESTEPS = 1000000
+ITERATIONS = 4
+TIMESTEPS = 500
 
 #checkpoint_callback = CheckpointCallback(save_freq=1000, save_path=models_dir)
 

@@ -1,0 +1,23 @@
+import pandas as pd
+import numpy as np
+import sys
+import os
+
+
+class DataReader:
+
+    def __init__(self,
+                 dataPath,
+                 nodeFile = "nodes.csv",
+                 vehicleFile = "vehicles.csv"
+                 ):
+        
+        if not os.path.exists(dataPath):
+            print("No se ha encontrado el path: {}".format(dataPath), file = sys.stderr)
+            sys.exit(1)
+
+        self.nodePath = os.path.join(dataPath, nodeFile)
+        self.vehiclePath = os.path.join(dataPath, vehicleFile)
+
+        self.nodeInfo = pd.read_csv(self.nodePath, index_col=0)
+        self.vehicleInfo = pd.read_csv(self.vehiclePath, index_col=0)

@@ -8,13 +8,26 @@ import os
 from datetime import date
 import time
 from dataGenerator import DataGenerator
+from dataReader import DataReader
 
 
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, nVehiculos, nNodos, maxNumVehiculos = 50, maxNumNodos = 100, maxCapacity = 100, maxNodeCapacity = 6, speed = 70, twMin = None, twMax = None, seed = 6, multiTrip = False, singlePlot = False, sameMaxNodeVehicles = False, dataPath = None):
+    def __init__(self, seed = 6, multiTrip = False, singlePlot = False):
         np.random.seed(seed)
+        self.multiTrip = multiTrip
+        self.singlePlot = singlePlot
+
+
+    def createEnv(self,
+                  nVehiculos, nNodos, 
+                  maxNumVehiculos = 50, maxNumNodos = 100,
+                  maxCapacity = 100, maxNodeCapacity = 6,
+                  sameMaxNodeVehicles = False,
+                  twMin = None, twMax = None,
+                  speed = 70
+                  ):
 
         if sameMaxNodeVehicles:
             self.maxNumVehiculos = nVehiculos
@@ -24,14 +37,7 @@ class VRPEnv(gym.Env):
             self.maxNumVehiculos = maxNumVehiculos
             self.maxNumNodos = maxNumNodos + 1
 
-
-        self.dataGen = DataGenerator(self.maxNumNodos, self.maxNumVehiculos)
-
-        #self.loadData()
-
         # Características del entorno
-        self.multiTrip = multiTrip
-        self.singlePlot = singlePlot
         self.nNodos = nNodos + 1 # +1 del depot
         self.nVehiculos = nVehiculos
         self.currTime = np.zeros(shape=(self.maxNumVehiculos,1))
@@ -45,17 +51,36 @@ class VRPEnv(gym.Env):
         self.v_maxCapacity = maxCapacity
         self.v_speed = speed
 
-        if dataPath is None:
-            self.generateRandomData()
+        self.dataGen = DataGenerator(self.maxNumNodos, self.maxNumVehiculos)
+        self.generateRandomData()
         
-        self.loadData()
+        # Cálculo de matrices de distancia
+        self.createMatrixes()
+
+        # Creamos el espacio de acciones y el espacio de observaciones
+        self.createSpaces()
+
+
+
+    def readEnvFromFile(self, nVehiculos, nNodos, filePath):
+        self.dataReader  = DataReader(filePath)
+
+        self.loadData(self.dataReader)
+        
+        self.nNodos = nNodos + 1
+        self.nVehiculos = nVehiculos
+
+        self.maxNumNodos = len(self.dataReader.nodeInfo.index)
+        self.maxNumVehiculos = len(self.dataReader.vehicleInfo.index)
 
         # Cálculo de matrices de distancia
         self.createMatrixes()
 
-        # Creamos las time windows
-        # self.crearTW(twMin, twMax)
+        # Creamos el espacio de acciones y el espacio de observaciones
+        self.createSpaces()
 
+
+    def createSpaces(self):
         # Tantas acciones como (número de nodos + depot) * número de vehículos
         self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos)
 
@@ -255,7 +280,6 @@ class VRPEnv(gym.Env):
     def createMatrixes(self):
         self.distanceMatrix = np.zeros(shape = (self.maxNumNodos, self.maxNumNodos))
         self.timeMatrix = np.zeros(shape = (self.maxNumNodos, self.maxNumNodos))
-
         for i in range(0, self.maxNumNodos):
             for j in range(0, self.maxNumNodos):
                 distance = np.linalg.norm(abs(self.n_coordenadas[j] - self.n_coordenadas[i]))
@@ -284,23 +308,25 @@ class VRPEnv(gym.Env):
         self.dataGen.generateVehicleInfo()
         self.dataGen.saveData()
 
+        self.loadData(self.dataGen)
 
-    def loadData(self):
+
+    def loadData(self, reader):
         # Características de los nodos
-        self.n_coordenadas = np.array([self.dataGen.nodeInfo["coordenadas_X"], self.dataGen.nodeInfo["coordenadas_Y"]]).T
+        self.n_coordenadas = np.array([reader.nodeInfo["coordenadas_X"], reader.nodeInfo["coordenadas_Y"]]).T
 
-        self.n_originalDemands = self.dataGen.nodeInfo["demandas"].to_numpy()
+        self.n_originalDemands = reader.nodeInfo["demandas"].to_numpy()
         self.n_demands = copy.deepcopy(self.n_originalDemands)
-        #self.n_maxNodeCapacity = self.dataGen.nodeInfo["maxDemand"].to_numpy()  # TODO
+        self.n_maxNodeCapacity = reader.nodeInfo["maxDemand"][0] # TODO
 
         # Características de los vehículos
-        #self.v_maxCapacity = self.dataGen.vehicleInfo["maxCapacity"].to_numpy() # TODO
-        #self.v_speed = self.dataGen.vehicleInfo["speed"].to_numpy()             # TODO
-        self.v_loads = self.dataGen.vehicleInfo["maxCapacity"].to_numpy()
-        self.v_speeds = self.dataGen.vehicleInfo["speed"].to_numpy()
+        self.v_maxCapacity = reader.vehicleInfo["maxCapacity"][0] # TODO
+        self.v_speed = reader.vehicleInfo["speed"][0]      # TODO
+        self.v_loads = reader.vehicleInfo["maxCapacity"].to_numpy()
+        self.v_speeds = reader.vehicleInfo["speed"].to_numpy()
 
-        self.minTW = self.dataGen.nodeInfo["minTW"].to_numpy()
-        self.maxTW = self.dataGen.nodeInfo["maxTW"].to_numpy()
+        self.minTW = reader.nodeInfo["minTW"].to_numpy()
+        self.maxTW = reader.nodeInfo["maxTW"].to_numpy()
 
 
 

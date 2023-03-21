@@ -2,6 +2,8 @@ from vrpEnv import VRPEnv
 
 from stable_baselines3.common.env_checker import check_env
 
-env = VRPEnv(nVehiculos = 2, nNodos=5, twMax = 50)
+env = VRPEnv()
+env.createEnv(50, 100, sameMaxNodeVehicles=True)
+
 # It will check your custom environment and output additional warnings if needed
 check_env(env)

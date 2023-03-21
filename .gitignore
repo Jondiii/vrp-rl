@@ -2,6 +2,7 @@ models/
 logs/
 grafos/
 reports/
+data/ 
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

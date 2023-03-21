@@ -14,11 +14,15 @@ from dataReader import DataReader
 class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
+    decayingStart = None
+
     def __init__(self, seed = 6, multiTrip = False, singlePlot = False):
         np.random.seed(seed)
         self.multiTrip = multiTrip
         self.singlePlot = singlePlot
+        self.currSteps = 0
 
+        self.isDoneFunction = self.isDone
 
     def createEnv(self,
                   nVehiculos, nNodos, 
@@ -80,6 +84,7 @@ class VRPEnv(gym.Env):
         self.createSpaces()
 
 
+
     def createSpaces(self):
         # Tantas acciones como (número de nodos + depot) * número de vehículos
         self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos)
@@ -100,6 +105,7 @@ class VRPEnv(gym.Env):
 
 
     def step(self, action):
+        self.currSteps += 1
         if action >= self.nNodos * self.nVehiculos:
             return self.getState(), -1, False, dict(info = "Acción rechazada por actuar sobre un nodo no disponible.", accion = action, nNodos = self.nNodos)
 
@@ -146,7 +152,7 @@ class VRPEnv(gym.Env):
         self.currTime[vehiculo] += tiempo
 
         # Comprobar si se ha llegado al final del episodio
-        done = self.isDone()
+        done = self.isDoneFunction()
 
         return self.getState(), reward, done, dict()
 
@@ -225,10 +231,65 @@ class VRPEnv(gym.Env):
         return obs
 
 
+    def setDecayingIsDone(self, totalSteps, decayingStart = 0.5, decayingRate = 0.1, everyNtimesteps = 0.05):
+        self.totalSteps = totalSteps
+        self.decayingStart = decayingStart
+        self.decayingRate = decayingRate
+        self.everyNTimesteps = totalSteps * everyNtimesteps
+
+        self.minimumVisited = 1
+
+        self.isDoneFunction = self.decayingIsDone
+
+
+
+    def decayingIsDone(self):
+        if self.minimumVisited == 1:
+            if self.currSteps / self.totalSteps >= self.decayingStart: # Si se pasa de más de (50%), hacemos que solo haya que visitar el (90%)
+                self.minimumVisited -= self.decayingRate
+
+            return self.isDone()
+        
+        if self.currSteps % self.everyNTimesteps == 0: # Si hace
+            self.minimumVisited -= self.decayingRate
+
+
+        if self.multiTrip:
+            porcentajeVisitados = np.count_nonzero(self.visited[1:self.nNodos] == 1) / self.nNodos
+
+            if porcentajeVisitados >= self.minimumVisited:
+                self.grafoCompletado = copy.deepcopy(self.rutas)
+                self.ordenVisitasCompletas = copy.deepcopy(self.v_ordenVisitas)
+                self.tiempoFinal = copy.deepcopy(self.currTime)
+                return True
+        
+
+        if np.all(self.v_posicionActual == 0):
+            porcentajeVisitados = np.count_nonzero(self.visited[:self.nNodos] == 1) / self.nNodos
+                        
+            if porcentajeVisitados >= self.minimumVisited:
+                self.grafoCompletado = copy.deepcopy(self.rutas)
+                self.ordenVisitasCompletas = copy.deepcopy(self.v_ordenVisitas)
+                self.tiempoFinal = copy.deepcopy(self.currTime)
+                return True
+            
+        else:
+            porcentajeVisitados = np.count_nonzero(self.visited[:self.nNodos] == 1) / self.nNodos
+            
+            if porcentajeVisitados >= self.minimumVisited:
+                self.visited[0] = 0
+
+     
+        return False
+
+        
+
+
+
 
     def isDone(self): # can't DO: cambiar esto de orden, primero comprobar vehículo y después nodos --> no se puede por lo de marcar el depot como no visitado
         if self.multiTrip:
-            allVisited = np.all(self.visited[1:] == 1)
+            allVisited = np.all(self.visited[1:] == 1) # TODO Aquí da igual que el camión haya vuelto al depot o no... está bien??
 
             if allVisited:
                 self.grafoCompletado = copy.deepcopy(self.rutas)
@@ -247,10 +308,10 @@ class VRPEnv(gym.Env):
         else:
             allVisited = np.all(self.visited == 1)
             if allVisited:
-                self.visited[0] = 0 
-    
+                self.visited[0] = 0
+
+     
         return False
-    
 
 
     def getReward(self, distancia, action, vehicle):

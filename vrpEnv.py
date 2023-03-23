@@ -231,6 +231,54 @@ class VRPEnv(gym.Env):
         return obs
 
 
+    def setIncreasingIsDone(self, totalSteps, minNumVisited = 0.5, increaseStart = 0.5, increaseRate = 0.1, everyNtimesteps = 0.05):
+        self.totalSteps = totalSteps
+        self.increaseStart = increaseStart
+        self.increaseRate = increaseRate
+        self.everyNTimesteps = totalSteps * everyNtimesteps
+
+        self.minimumVisited = minNumVisited
+
+        self.isDoneFunction = self.increasingIsDone
+
+
+
+    def increasingIsDone(self):
+        if self.currSteps / self.totalSteps >= self.increaseStart: # Si se pasa de más de (50%), hacemos que solo haya que visitar el (90%)
+            if self.currSteps % self.everyNTimesteps == 0: # Si hace
+                self.minimumVisited += self.increaseRate
+    
+        print(self.minimumVisited)
+
+        if self.multiTrip:
+            porcentajeVisitados = np.count_nonzero(self.visited[1:self.nNodos] == 1) / self.nNodos
+
+            if porcentajeVisitados >= self.minimumVisited:
+                self.grafoCompletado = copy.deepcopy(self.rutas)
+                self.ordenVisitasCompletas = copy.deepcopy(self.v_ordenVisitas)
+                self.tiempoFinal = copy.deepcopy(self.currTime)
+                return True
+    
+
+        if np.all(self.v_posicionActual == 0):
+            porcentajeVisitados = np.count_nonzero(self.visited[:self.nNodos] == 1) / self.nNodos
+                        
+            if porcentajeVisitados >= self.minimumVisited:
+                self.grafoCompletado = copy.deepcopy(self.rutas)
+                self.ordenVisitasCompletas = copy.deepcopy(self.v_ordenVisitas)
+                self.tiempoFinal = copy.deepcopy(self.currTime)
+                return True
+            
+        else:
+            porcentajeVisitados = np.count_nonzero(self.visited[:self.nNodos] == 1) / self.nNodos
+            
+            if porcentajeVisitados >= self.minimumVisited:
+                self.visited[0] = 0
+
+        return False
+
+
+
     def setDecayingIsDone(self, totalSteps, decayingStart = 0.5, decayingRate = 0.1, everyNtimesteps = 0.05):
         self.totalSteps = totalSteps
         self.decayingStart = decayingStart
@@ -242,17 +290,45 @@ class VRPEnv(gym.Env):
         self.isDoneFunction = self.decayingIsDone
 
 
+    """
+    No funciona bien cambiar el isDone(). Esto es porque solo se cambia el % mínimo a completar cuando
+    self.currSteps % self.everyNTimesteps == 0, y esto no ocurre de forma consistente, porque solo se llama
+    al isDone() en algunos timesteps, no en todos (no se llama cuando se toma una acción inválida).
+
+    Soluciones:
+        a)  Hacer que se llame siempre que step() haga return. No debería ocurrir que isDone() devuelva True
+            si la acción no se puede hacer, ya que si estamos comprobando la valided de la acción, eso quiere decir
+            que el episodio acaba de comenzar y por tanto no pueden estar todos los nodos visitados o que el episodio
+            ya había empezado pero no había terminado, en cuyo caso no habrán cambiado los nodos visitados desde el
+            último isDone() hasta este. La pega es que me parece una solución un poco fea.
+        
+        b)  La alternativa más "elegante" que se me ocurre es hacer que el % mínimo a visitar se actualice de manera
+            independiente a las llamadas a isDone().
+
+    Nota: usar el comando python crearYEntrenar.py >> log.txt 2>> errLog.txt para redirigir las salidas de prints/logs y errores.
+            
+    """
+
 
     def decayingIsDone(self):
         if self.minimumVisited == 1:
             if self.currSteps / self.totalSteps >= self.decayingStart: # Si se pasa de más de (50%), hacemos que solo haya que visitar el (90%)
                 self.minimumVisited -= self.decayingRate
+                print("currSteps: ",self.currSteps)
+                print("porcentaje que vamos: ",self.currSteps / self.totalSteps)
+                print("decayStart: ", self.decayingStart)
+                print("everyNTimesteps: ", self.everyNTimesteps)
+                print(self.minimumVisited)
 
             return self.isDone()
         
-        if self.currSteps % self.everyNTimesteps == 0: # Si hace
+        print("currSteps: ",self.currSteps)
+        print(self.currSteps % self.everyNTimesteps)
+        
+        if round(self.currSteps % self.everyNTimesteps) == 0: # Si hace
             self.minimumVisited -= self.decayingRate
-
+            print("currSteps: ",self.currSteps)
+            print(self.minimumVisited)
 
         if self.multiTrip:
             porcentajeVisitados = np.count_nonzero(self.visited[1:self.nNodos] == 1) / self.nNodos

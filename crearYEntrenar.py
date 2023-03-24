@@ -21,7 +21,7 @@ if not os.path.exists(log_dir):
 ## python3 arduinoDriver.py >> log_file 2>> err_file --> para ver si falla y para o quçe
 env = VRPEnv()
 env.createEnv(5, 10, sameMaxNodeVehicles=True)
-env.setDecayingIsDone(ITERATIONS * TIMESTEPS)
+env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 
 

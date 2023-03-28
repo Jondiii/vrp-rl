@@ -191,7 +191,7 @@ class VRPEnv(gym.Env):
             self.v_ordenVisitas.append([0])
         
         self.done = False
-
+        
         return self.getState()
 
 
@@ -264,7 +264,6 @@ class VRPEnv(gym.Env):
 
         if np.all(self.v_posicionActual == 0):
             porcentajeVisitados = np.count_nonzero(self.visited[:self.nNodos] == 1) / self.nNodos
-                        
             if porcentajeVisitados >= self.minimumVisited:
                 self.grafoCompletado = copy.deepcopy(self.rutas)
                 self.ordenVisitasCompletas = copy.deepcopy(self.v_ordenVisitas)
@@ -292,11 +291,6 @@ class VRPEnv(gym.Env):
         self.isDoneFunction = self.decayingIsDone
 
 
-    """
-    Nota: usar el comando python crearYEntrenar.py >> log.txt 2>> errLog.txt para redirigir las salidas de prints/logs y errores.   
-    """
-
-
     def decayingIsDone(self):
         if self.minimumVisited == 1:
             if self.currSteps / self.totalSteps >= self.decayingStart: # Si se pasa de más de (50%), hacemos que solo haya que visitar el (90%)
@@ -304,7 +298,7 @@ class VRPEnv(gym.Env):
 
             return self.isDone()
         
-        if round(self.currSteps % self.everyNTimesteps) == 0: # Si hace
+        if self.currSteps % self.everyNTimesteps == 0: # Si hace
             self.minimumVisited -= self.decayingRate
 
         if self.multiTrip:

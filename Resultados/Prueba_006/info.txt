@@ -12,9 +12,6 @@ CAMBIOS:
     - Se ha implementado un isDone( ) variable. El requisito para que un episodio se dé por completado
       puede aumentar o disminuir paulatinamente. En este caso, se ha hecho que comience el mínimo en 50%,
       y aumente poco a poco hasta 100% al llegar a la mitad de los steps totales.
-    - Se han 
-
-NOTAS:
     - Se ha reducido la demanda máxima de los nodos (30 -> 10) para poder reducir el número de vehículos usados (50 -> 10), lo que ha hecho
       que el aprendizaje fuese más rápido. Antes el agente no lograba aprender nada porque había 50 vehículos, y, para poder dar
       un entorno como completado, era necesario que todos volviesen al depot, aunque no se hubiesen visitado todos los nodos. Por ello,
@@ -22,3 +19,7 @@ NOTAS:
 
       De querer tener muchos vehículos, seguramente sea necesario cambiar también la condición de que todos los vehículos deban volver al depot
       (se podría hacer que se "quedasen" en el último nodo que hayan visitado, y "forzarles" a volver al depot una vez finalizado el episodio)
+
+NOTAS:
+    - No se pueden cambiar las demandas cuando usamos un modelo pre-entrenado, deben coincidir con las del entrenamiento.
+      Para solventarlo, se podría hacer que todas las demandas estuviesen representadas en forma de porcentaje.

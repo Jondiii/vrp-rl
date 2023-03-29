@@ -12,7 +12,7 @@ class Grafo:
 
         self.graph = nx.complete_graph(nNodos)
         self.coordenadas = {   # Enumerate pone números delante de los elementos de una lista, así que la i
-                            # se queda con el número que haya puesto el enumerate.
+                               # se queda con el número que haya puesto el enumerate.
             i: coordinates for i, coordinates in enumerate(coordenadas)
         }
         
@@ -50,26 +50,27 @@ class Grafo:
         return distancia, tiempo
 
 
-    def dibujarGrafo(self, ax, edgeColor = "red"):
-        posicion = nx.get_node_attributes(self.graph, "coordinates")
-        coloresNodos = nx.get_node_attributes(self.graph, "node_color").values()
-
+    def dibujarGrafo(self, ax, nodeColor = "black", edgeColor = "red"):
         def isNodeVisited(node):
-            return node["visited"]
-
+            return self.graph.nodes[node]["visited"] == True
+        
+        posicion = nx.get_node_attributes(self.graph, "coordinates")
+        
         # Primero dibujamos los nodos
+        subGrafo = nx.subgraph_view(self.graph, isNodeVisited)
 
         nx.draw_networkx_nodes(
             self.graph,
             posicion,
-            node_color=coloresNodos,
+            node_color = nodeColor,
             ax=ax,
-            #nodelist = nx.subgraph_view(self.graph, isNodeVisited),
+            nodelist = subGrafo.nodes(),
             node_size=100
             )
 
         # Después dibujamos las aristas
         aristas = [x for x in self.graph.edges(data = True) if x[2]["visited"]]
+
         nx.draw_networkx_edges(
             self.graph,
             posicion,
@@ -82,7 +83,7 @@ class Grafo:
 
         if self.drawDemand:
             posicionLabelDemanda = {k: (v + self.offset) for k, v in posicion.items()}
-            labelDemanda = nx.get_node_attributes(self.graph, "demand")
+            labelDemanda = nx.get_node_attributes(subGrafo, "demand")
             labelDemanda = {k: np.round(v, 2) for k, v in labelDemanda.items()}
             nx.draw_networkx_labels(
                 self.graph, posicionLabelDemanda, labels=labelDemanda, ax=ax

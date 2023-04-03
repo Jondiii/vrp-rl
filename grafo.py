@@ -55,14 +55,15 @@ class Grafo:
             return self.graph.nodes[node]["visited"] == True
         
         posicion = nx.get_node_attributes(self.graph, "coordinates")
-        
+
         # Primero dibujamos los nodos
         subGrafo = nx.subgraph_view(self.graph, isNodeVisited)
+        node_colors = [c for _, c in subGrafo.nodes(data="node_color")]
 
         nx.draw_networkx_nodes(
             self.graph,
             posicion,
-            node_color = nodeColor,
+            node_color = node_colors,
             ax=ax,
             nodelist = subGrafo.nodes(),
             node_size=100

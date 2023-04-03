@@ -7,8 +7,11 @@ ALGORTIHM = "PPO"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
-ITERATIONS = 20
-TIMESTEPS = 2048*20 # Poner múltiplos de 2048
+# ITERATIONS = 20
+# TIMESTEPS = 2048*20 # Poner múltiplos de 2048
+
+ITERATIONS = 2
+TIMESTEPS = 200 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):
     os.makedirs(models_dir)
@@ -18,7 +21,7 @@ if not os.path.exists(log_dir):
 
 ## python3 arduinoDriver.py >> log_file 2>> err_file --> para ver si falla y para o quçe
 env = VRPEnv()
-env.createEnv(nVehiculos = 10, nNodos = 100, maxNodeCapacity = 2, sameMaxNodeVehicles=True)
+env.createEnv(nVehiculos = 4, nNodos = 10, maxNodeCapacity = 5, sameMaxNodeVehicles=True)
 env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 

@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/home/jdiaz/codigo/vrp-rl/crearYEntrenar.py", line 1, in <module>
-    from stable_baselines3 import PPO, DQN
-ModuleNotFoundError: No module named 'stable_baselines3'

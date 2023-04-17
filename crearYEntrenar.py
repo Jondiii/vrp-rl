@@ -16,7 +16,7 @@ if not os.path.exists(models_dir):
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-## python3 arduinoDriver.py >> log_file 2>> err_file --> para ver si falla y para o quçe
+## python crearYEntrenar.py >> log_file 2>> err_file --> para ver si falla y para o quçe
 env = VRPEnv(multiTrip = True)
 env.createEnv(nVehiculos = 30, nNodos = 100, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
 env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)

@@ -9,7 +9,7 @@ models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
 ITERATIONS = 20
-TIMESTEPS = 2048*20 # Poner múltiplos de 2048
+TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):
     os.makedirs(models_dir)
@@ -24,8 +24,6 @@ env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
-
-
 
 eval_Env = VRPEnv(multiTrip = True)
 eval_Env.createEnv(nVehiculos = 30, nNodos = 100, maxNodeCapacity = 4, sameMaxNodeVehicles=True)

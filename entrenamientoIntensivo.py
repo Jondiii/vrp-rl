@@ -80,6 +80,8 @@ for j in range(1, ITERATIONS + 1):
 
         model.save(f"{models_dir}/{TIMESTEPS * (j*i+1)}")
 
+        env.render()
+
 
 print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))
 

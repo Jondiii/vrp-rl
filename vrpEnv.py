@@ -15,6 +15,7 @@ class VRPEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
     decayingStart = None
+    grafoCompletado = None
 
     def __init__(self, seed = 6, multiTrip = False, singlePlot = False):
         np.random.seed(seed)
@@ -440,6 +441,9 @@ class VRPEnv(gym.Env):
 
     # Guarda el último conjunto de grafos completado 
     def render(self):
+        if self.grafoCompletado == None:
+            return
+        
         if self.singlePlot:
             self.grafoCompletado.guardarGrafosSinglePlot()
 

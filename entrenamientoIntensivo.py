@@ -71,7 +71,7 @@ for j in range(1, ITERATIONS + 1):
         env.close()
 
         env = VRPEnv(multiTrip = True)
-        env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case" + i))
+        env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case" + str(i)))
         env.reset()
 
         model = PPO.load(f"{models_dir}/{TIMESTEPS * i * j}", env)
@@ -79,8 +79,6 @@ for j in range(1, ITERATIONS + 1):
         model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)
 
         model.save(f"{models_dir}/{TIMESTEPS * (j*i+1)}")
-
-        env.render()
 
 
 print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))

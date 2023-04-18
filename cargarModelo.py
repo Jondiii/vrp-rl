@@ -27,7 +27,7 @@ for ep in range(episodes):
     done = False
     
     while not done:
-        action, _ = model.predict(obs)
+        action, _ = model.predict(obs, deterministic = True)
         obs, reward, done, info = env.step(action)
     
     env.render()

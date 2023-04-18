@@ -5,8 +5,18 @@ from vrpEnv import VRPEnv
 import os
 import time
 
+"""
+Este script crea tantos casos de uso como numCasos y los guarda en dataFolder. A continuación, realiza un entrenamiento intensivo en el que
+se usan todos estos casos de forma secuencial. Se realiza un entrenamiento inicial con el primer caso durante TIMESTEPS, tras lo que se pasa
+a entrenar con el siguiente caso, de nuevo durante TIMESTEPS. Esto se hace tantas veces como numCasos, y una vez llegado al último se
+vuelve a empezar desde el primero. Este proceso se repite ITERATIONS veces, por lo que el total de timesteps final del entrenamiento sería
+TIMESTEPS * numCasos * TIMESTEPS
+"""
 
+ITERATIONS = 20
+TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 numCasos = 10
+
 numNodos = 50
 numVehiculos = 20
 
@@ -19,7 +29,6 @@ v_speed = 70
 
 
 dataFolder = "data/intensivo"
-
 
 ALGORTIHM = "PPO"
 models_dir = "models/" + ALGORTIHM
@@ -43,39 +52,37 @@ for i in range(numCasos):
     dataGen.saveData()
 
 
-
-"""
-
-ALGORTIHM = "PPO"
-
-model_name = "100000"
-
-models_dir = "models/" + ALGORTIHM
-
-
-
-model_path = f"{models_dir}/{model_name}"
-
-env = VRPEnv(nVehiculos = 3, nNodos = 10, maxNumNodos=20, maxNumVehiculos=5)
-
+# Como se va a entrenar un modelo con múltiples variantes de un mismo entorno, primero hay que crear el modelo y entrenarlo un poco
+# Una vez creado, en las siguientes iteraciones se cargará dicho modelo, para entrenarlo con un entorno algo distinto.
+env = VRPEnv(multiTrip = True)
+env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case1"))
 env.reset()
 
-model = PPO.load(model_path, env)
-
-episodes = 10
+model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
 start_time = time.time()
 
-for ep in range(episodes):
-    obs = env.reset()
-    done = False
-    
-    while not done:
-        action, _ = model.predict(obs)
-        obs, reward, done, info = env.step(action)
-    
-    env.render()
-    env.close()
+
+model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)
+model.save(f"{models_dir}/{TIMESTEPS}")
+
+for j in range(1, ITERATIONS + 1):
+    for i in range(1, numCasos + 1):
+        env.close()
+
+        env = VRPEnv(multiTrip = True)
+        env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case" + i))
+        env.reset()
+
+        model = PPO.load(f"{models_dir}/{TIMESTEPS * i * j}", env)
+
+        model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)
+
+        model.save(f"{models_dir}/{TIMESTEPS * (j*i+1)}")
+
+        env.render()
+
 
 print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))
-"""
+
+env.close()

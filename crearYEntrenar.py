@@ -1,3 +1,4 @@
+from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3 import PPO, DQN
 from vrpEnv import VRPEnv
 import os
@@ -7,7 +8,7 @@ ALGORTIHM = "PPO"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
-ITERATIONS = 50
+ITERATIONS = 20
 TIMESTEPS = 2048*20 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):
@@ -16,7 +17,7 @@ if not os.path.exists(models_dir):
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-## python crearYEntrenar.py >> log_file 2>> err_file --> para ver si falla y para o quçe
+
 env = VRPEnv(multiTrip = True)
 env.createEnv(nVehiculos = 30, nNodos = 100, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
 env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
@@ -24,10 +25,22 @@ env.reset()
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
+
+
+eval_Env = VRPEnv(multiTrip = True)
+eval_Env.createEnv(nVehiculos = 30, nNodos = 100, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
+eval_Env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
+eval_Env.reset()
+
+eval_callback = EvalCallback(eval_Env, best_model_save_path='./models/best/', # Sirve para que se vaya guardando siempre el mejor modelo
+                             log_path='./logs/', eval_freq=10000,
+                             deterministic=True, render=False)
+
+
 start_time = time.time()
 
 for i in range(1, ITERATIONS+1):
-    model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)
+    model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM, callback = eval_callback)
     model.save(f"{models_dir}/{TIMESTEPS*i}")
 
 print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))

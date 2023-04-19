@@ -14,7 +14,7 @@ TIMESTEPS * numCasos * TIMESTEPS
 """
 
 ITERATIONS = 20
-TIMESTEPS = 2048*10 # Poner múltiplos de 2048
+TIMESTEPS = 2048*1 # Poner múltiplos de 2048
 numCasos = 10
 
 numNodos = 50
@@ -72,9 +72,11 @@ for j in range(1, ITERATIONS + 1):
 
         env = VRPEnv(multiTrip = True)
         env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case" + str(i)))
+        env.setIncreasingIsDone(TIMESTEPS)
         env.reset()
 
-        model = PPO.load(f"{models_dir}/{TIMESTEPS * i * j}", env)
+        #model = PPO.load(f"{models_dir}/{TIMESTEPS * i * j}", env)
+        model.set_env(env)
 
         model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)
 

@@ -1,12 +1,11 @@
+import time
 import gym
 from gym import spaces
 import numpy as np
-import pandas as pd
 from rutas import Rutas
 import copy
 import os
 from datetime import date
-import time
 from dataGenerator import DataGenerator
 from dataReader import DataReader
 
@@ -151,6 +150,8 @@ class VRPEnv(gym.Env):
 
         # Actualizar tiempo de recorrido del vehículo que realice la acción
         self.currTime[vehiculo] += tiempo
+
+        #self.graphicalRender()
 
         # Comprobar si se ha llegado al final del episodio
         done = self.isDoneFunction()
@@ -457,11 +458,15 @@ class VRPEnv(gym.Env):
     def render2(self):
         if self.singlePlot:
             self.rutas.guardarGrafosSinglePlot()
-            
         else:
             self.rutas.guardarGrafos()
         
         self.crearReport(self.v_ordenVisitas, self.currTime)
+
+
+
+    def graphicalRender(self):
+        self.rutas.getRutasVisual()
 
 
     def crearReport(self, v_ordenVisitas, currTime, directorio = 'reports', name = 'report', extension = '.txt'):

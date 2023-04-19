@@ -1,13 +1,14 @@
 import numpy as np
 from grafo import Grafo
 from datetime import date
+import matplotlib
 import matplotlib.pyplot as plt
 import os
 
 class Rutas:
     def __init__(self, nVehiculos, nNodos, maxNumVehiculos, maxNumNodos, demands, coordenadas, speeds, drawDemand = True):
         self.grafos = []
-
+        matplotlib.use('Agg') # Descomentar si se está trabajando en el server
         self.nNodos = nNodos
         self.nVehiculos = nVehiculos
         self.maxNumVehiculos = maxNumVehiculos
@@ -104,3 +105,21 @@ class Rutas:
         plt.savefig(nombreFigura)
 
         plt.close()
+
+
+    def getRutasVisual(self):
+        num_columns = min(len(self.grafos), 3)
+        num_rows = np.ceil(len(self.grafos) / num_columns).astype(int)
+
+        plt.clf()
+        plt.figure(figsize=(5 * num_columns, 5 * num_rows))
+
+        for n, idGrafo in enumerate(range(len(self.grafos))):
+            ax = plt.subplot(num_rows, num_columns, n + 1)
+
+            self.grafos[idGrafo].dibujarGrafo(ax = ax)
+
+        if plt.fignum_exists(0):
+            plt.draw()
+        else:
+            plt.show()

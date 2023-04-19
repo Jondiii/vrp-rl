@@ -9,7 +9,7 @@ models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
 ITERATIONS = 20
-TIMESTEPS = 2048*10 # Poner múltiplos de 2048
+TIMESTEPS = 2048*4 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):
     os.makedirs(models_dir)
@@ -25,20 +25,10 @@ env.reset()
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
-eval_Env = VRPEnv(multiTrip = True)
-eval_Env.createEnv(nVehiculos = 30, nNodos = 100, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
-eval_Env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
-eval_Env.reset()
-
-eval_callback = EvalCallback(eval_Env, best_model_save_path='./models/best/', # Sirve para que se vaya guardando siempre el mejor modelo
-                             log_path='./logs/', eval_freq=10000,
-                             deterministic=True, render=False)
-
-
 start_time = time.time()
 
 for i in range(1, ITERATIONS+1):
-    model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM, callback = eval_callback)
+    model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)
     model.save(f"{models_dir}/{TIMESTEPS*i}")
 
 print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))

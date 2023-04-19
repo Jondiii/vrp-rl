@@ -14,7 +14,7 @@ TIMESTEPS * numCasos * TIMESTEPS
 """
 
 ITERATIONS = 20
-TIMESTEPS = 2048*1 # Poner múltiplos de 2048
+TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 numCasos = 10
 
 numNodos = 50

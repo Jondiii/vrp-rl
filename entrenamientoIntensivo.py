@@ -78,7 +78,7 @@ for j in range(1, ITERATIONS + 1):
 
         model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)
 
-        model.save(f"{models_dir}/{TIMESTEPS * (j*i+1)}")
+        model.save(f"{models_dir}/{TIMESTEPS * (j*(i+1))}")
 
         env.render()
 

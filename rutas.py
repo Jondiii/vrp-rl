@@ -112,14 +112,10 @@ class Rutas:
         num_rows = np.ceil(len(self.grafos) / num_columns).astype(int)
 
         plt.clf()
-        plt.figure(figsize=(5 * num_columns, 5 * num_rows))
 
         for n, idGrafo in enumerate(range(len(self.grafos))):
             ax = plt.subplot(num_rows, num_columns, n + 1)
 
             self.grafos[idGrafo].dibujarGrafo(ax = ax)
 
-        if plt.fignum_exists(0):
-            plt.draw()
-        else:
-            plt.show()
+        plt.draw() # Esto tiene que actualizar la figura pero antes hay que llamar a plt.show

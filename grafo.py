@@ -50,7 +50,7 @@ class Grafo:
         return distancia, tiempo
 
 
-    def dibujarGrafo(self, ax, nodeColor = "black", edgeColor = "red"):
+    def dibujarGrafo(self, ax, edgeColor = "red"):
         def isNodeVisited(node):
             return self.graph.nodes[node]["visited"] == True
         

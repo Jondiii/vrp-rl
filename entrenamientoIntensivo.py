@@ -20,7 +20,7 @@ numCasos = 10
 numNodos = 50
 numVehiculos = 20
 
-n_maxDemand = 30
+n_maxDemand = 6 # La demanda después se multiplica por 5, para que al generarla con números aleatorios no den decimales.
 n_twMin = None
 n_twMax = None
 

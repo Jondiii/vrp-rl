@@ -4,6 +4,7 @@ from dataGenerator import  DataGenerator
 from vrpEnv import VRPEnv
 import os
 import time
+from datetime import date
 
 """
 Este script crea tantos casos de uso como numCasos y los guarda en dataFolder. A continuación, realiza un entrenamiento intensivo en el que
@@ -27,6 +28,7 @@ n_twMax = None
 v_maxDemads = 100
 v_speed = 70
 
+fecha = str(date.today())
 
 dataFolder = "data/intensivo"
 
@@ -82,7 +84,7 @@ for j in range(1, ITERATIONS + 1):
 
         model.save(f"{models_dir}/{TIMESTEPS * (j*(i+1))}")
 
-        env.render()
+        env.render(fecha)
 
 
 print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))

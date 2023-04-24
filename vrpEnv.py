@@ -151,7 +151,7 @@ class VRPEnv(gym.Env):
         # Actualizar tiempo de recorrido del vehículo que realice la acción
         self.currTime[vehiculo] += tiempo
 
-        #self.graphicalRender()
+        self.graphicalRender()
 
         # Comprobar si se ha llegado al final del episodio
         done = self.isDoneFunction()
@@ -441,17 +441,17 @@ class VRPEnv(gym.Env):
 
 
     # Guarda el último conjunto de grafos completado 
-    def render(self):
+    def render(self, fecha = None):
         if self.grafoCompletado == None:
             return
         
         if self.singlePlot:
-            self.grafoCompletado.guardarGrafosSinglePlot()
+            self.grafoCompletado.guardarGrafosSinglePlot(fecha)
 
         else:
-            self.grafoCompletado.guardarGrafos()
+            self.grafoCompletado.guardarGrafos(fecha)
 
-        self.crearReport(self.ordenVisitasCompletas, self.tiempoFinal)
+        self.crearReport(self.ordenVisitasCompletas, self.tiempoFinal, fecha)
 
 
     # Guarda el conjunto actual de grafos, independientemente de si están completos o no
@@ -469,9 +469,12 @@ class VRPEnv(gym.Env):
         self.rutas.getRutasVisual()
 
 
-    def crearReport(self, v_ordenVisitas, currTime, directorio = 'reports', name = 'report', extension = '.txt'):
-        directorio = os.path.join(directorio, str(date.today()))
-        
+    def crearReport(self, v_ordenVisitas, currTime, fecha, directorio = 'reports', name = 'report', extension = '.txt'):
+        if fecha is None:
+            fecha = str(date.today())
+
+        directorio = os.path.join(directorio, fecha)
+
         if not os.path.exists(directorio):
             os.makedirs(directorio)
 

@@ -151,7 +151,7 @@ class VRPEnv(gym.Env):
         # Actualizar tiempo de recorrido del vehículo que realice la acción
         self.currTime[vehiculo] += tiempo
 
-        self.graphicalRender()
+        #self.graphicalRender()
 
         # Comprobar si se ha llegado al final del episodio
         done = self.isDoneFunction()

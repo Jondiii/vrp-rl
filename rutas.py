@@ -8,7 +8,7 @@ import os
 class Rutas:
     def __init__(self, nVehiculos, nNodos, maxNumVehiculos, maxNumNodos, demands, coordenadas, speeds, drawDemand = True):
         self.grafos = []
-        #matplotlib.use('Agg') # Descomentar si se está trabajando en el server
+        matplotlib.use('Agg') # Descomentar si se está trabajando en el server
         self.nNodos = nNodos
         self.nVehiculos = nVehiculos
         self.maxNumVehiculos = maxNumVehiculos
@@ -40,7 +40,7 @@ class Rutas:
         return distancia, tiempo
 
 
-    def guardarGrafos(self, directorio = 'grafos', name = 'fig', extension = '.png'):
+    def guardarGrafos(self, fecha, directorio = 'grafos', name = 'fig', extension = '.png'):
         if fecha is None:
             fecha = str(date.today())
     

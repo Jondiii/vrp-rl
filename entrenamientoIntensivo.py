@@ -14,7 +14,7 @@ vuelve a empezar desde el primero. Este proceso se repite ITERATIONS veces, por 
 TIMESTEPS * numCasos * TIMESTEPS
 """
 
-ITERATIONS = 20
+ITERATIONS = 50
 TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 numCasos = 10
 

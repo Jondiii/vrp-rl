@@ -10,3 +10,45 @@ C:\Users\jon.diaz\AppData\Roaming\Python\Python37\site-packages\tensorflow\pytho
   _np_qint32 = np.dtype([("qint32", np.int32, 1)])
 C:\Users\jon.diaz\AppData\Roaming\Python\Python37\site-packages\tensorflow\python\framework\dtypes.py:535: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
   np_resource = np.dtype([("resource", np.ubyte, 1)])
+Traceback (most recent call last):
+  File "<frozen importlib._bootstrap_external>", line 87, in _path_is_mode_type
+  File "<frozen importlib._bootstrap_external>", line 81, in _path_stat
+FileNotFoundError: [WinError 2] El sistema no puede encontrar el archivo especificado: 'C:\\Users\\jon.diaz\\Anaconda3\\envs\\vrptocho\\lib\\site-packages\\mpl_toolkits\\__init__.cp37-win_amd64.pyd'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "crearYEntrenar.py", line 1, in <module>
+    from stable_baselines3.common.callbacks import EvalCallback
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\stable_baselines3\__init__.py", line 5, in <module>
+    from stable_baselines3.a2c import A2C
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\stable_baselines3\a2c\__init__.py", line 1, in <module>
+    from stable_baselines3.a2c.a2c import A2C
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\stable_baselines3\a2c\a2c.py", line 7, in <module>
+    from stable_baselines3.common.on_policy_algorithm import OnPolicyAlgorithm
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\stable_baselines3\common\on_policy_algorithm.py", line 9, in <module>
+    from stable_baselines3.common.base_class import BaseAlgorithm
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\stable_baselines3\common\base_class.py", line 16, in <module>
+    from stable_baselines3.common import utils
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\stable_baselines3\common\utils.py", line 23, in <module>
+    from stable_baselines3.common.logger import Logger, configure
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\stable_baselines3\common\logger.py", line 13, in <module>
+    from matplotlib import pyplot as plt
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\matplotlib\pyplot.py", line 57, in <module>
+    from matplotlib.figure import Figure, figaspect
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\matplotlib\figure.py", line 25, in <module>
+    from matplotlib import _blocking_input, docstring, projections
+  File "C:\Users\jon.diaz\Anaconda3\envs\vrptocho\lib\site-packages\matplotlib\projections\__init__.py", line 58, in <module>
+    from mpl_toolkits.mplot3d import Axes3D
+  File "<frozen importlib._bootstrap>", line 983, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 963, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 906, in _find_spec
+  File "<frozen importlib._bootstrap_external>", line 1280, in find_spec
+  File "<frozen importlib._bootstrap_external>", line 1246, in _get_spec
+  File "<frozen importlib._bootstrap_external>", line 1115, in __iter__
+  File "<frozen importlib._bootstrap_external>", line 1105, in _recalculate
+  File "<frozen importlib._bootstrap_external>", line 1252, in _get_spec
+  File "<frozen importlib._bootstrap_external>", line 1383, in find_spec
+  File "<frozen importlib._bootstrap_external>", line 95, in _path_isfile
+  File "<frozen importlib._bootstrap_external>", line 87, in _path_is_mode_type
+KeyboardInterrupt

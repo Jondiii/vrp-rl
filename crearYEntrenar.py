@@ -19,7 +19,7 @@ if not os.path.exists(log_dir):
 
 
 env = VRPEnv(multiTrip = True)
-env.createEnv(nVehiculos = 15, nNodos = 100, maxNodeCapacity = 3, sameMaxNodeVehicles=True)
+env.createEnv(nVehiculos = 3, nNodos = 30, maxNodeCapacity = 2, sameMaxNodeVehicles=True)
 env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 

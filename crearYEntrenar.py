@@ -8,8 +8,8 @@ ALGORTIHM = "PPO"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
-ITERATIONS = 20
-TIMESTEPS = 2048*4 # Poner múltiplos de 2048
+ITERATIONS = 100
+TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):
     os.makedirs(models_dir)
@@ -19,7 +19,7 @@ if not os.path.exists(log_dir):
 
 
 env = VRPEnv(multiTrip = True)
-env.createEnv(nVehiculos = 10, nNodos = 100, maxNodeCapacity = 2, sameMaxNodeVehicles=True)
+env.createEnv(nVehiculos = 15, nNodos = 100, maxNodeCapacity = 3, sameMaxNodeVehicles=True)
 env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 

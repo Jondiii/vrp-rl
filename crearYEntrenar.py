@@ -8,7 +8,7 @@ ALGORTIHM = "PPO"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
-ITERATIONS = 100
+ITERATIONS = 500
 TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):

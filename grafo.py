@@ -82,6 +82,14 @@ class Grafo:
             width=1.5,
         )
 
+        # Para dibujar el número del nodo
+        posicionIDNodo = {k: (v) for k, v in posicion.items()}
+        labelIDNodo = {id: id for id, _ in subGrafo.nodes.items()}
+        nx.draw_networkx_labels(
+            self.graph, posicionIDNodo, labels=labelIDNodo, ax=ax, font_color = "white", font_size = 8
+        )
+
+
         if self.drawDemand:
             posicionLabelDemanda = {k: (v + self.offset) for k, v in posicion.items()}
             labelDemanda = nx.get_node_attributes(subGrafo, "demand")
@@ -89,6 +97,7 @@ class Grafo:
             nx.draw_networkx_labels(
                 self.graph, posicionLabelDemanda, labels=labelDemanda, ax=ax
             )
+
 
 
     def getDistance(self, node1, node2):

@@ -8,7 +8,7 @@ import os
 class Rutas:
     def __init__(self, nVehiculos, nNodos, maxNumVehiculos, maxNumNodos, demands, coordenadas, speeds, drawDemand = True):
         self.grafos = []
-        matplotlib.use('Agg') # Descomentar si se está trabajando en el server
+        #matplotlib.use('Agg') # Descomentar si se está trabajando en el server
         self.nNodos = nNodos
         self.nVehiculos = nVehiculos
         self.maxNumVehiculos = maxNumVehiculos
@@ -17,7 +17,6 @@ class Rutas:
         self.coordenadas = coordenadas[:nNodos]
         self.speeds = speeds[:nVehiculos]
         self.drawDemand = drawDemand
-
         self.crearGrafos()
 
 
@@ -124,4 +123,5 @@ class Rutas:
 
             self.grafos[idGrafo].dibujarGrafo(ax = ax)
 
-        plt.draw() # Esto tiene que actualizar la figura pero antes hay que llamar a plt.show
+        plt.show()
+

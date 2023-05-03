@@ -20,7 +20,7 @@ if not os.path.exists(log_dir):
 
 env = VRPEnv(multiTrip = True)
 env.createEnv(nVehiculos = 3, nNodos = 30, maxNodeCapacity = 2, sameMaxNodeVehicles=True)
-env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
+#env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 
 model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)

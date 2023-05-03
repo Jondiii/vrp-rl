@@ -1,0 +1,21 @@
+03/05/2023
+
+ITERATIONS = 100
+TIMESTEPS = 2048*10 # Unas 2M de iteraciones en total
+
+TIEMPO: 178.17 minutos
+
+env.createEnv(nVehiculos = 10, nNodos = 100, maxNodeCapacity = 2, sameMaxNodeVehicles=True)
+env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
+
+CAMBIOS:
+    - Se ha cambiado la forma en la que se muestran los grafos finales, ya no salen los nodos no visitados. Lo malo es
+      que el depot sale en negro también.
+
+NOTAS:
+    - El principal objetivo de esta prueba era hacer un entrenamiento algo más largo que el de la prueba 006, y observar si el
+      aprendizaje se "mantenía". En algoritmos de RL, al aproximarse a la máxima optimización, el algoritmo "deja" de aprender
+      (lo que se muestra como una línea de reward más o menos horizontal), pero en ningún caso debería "desaprender", como ocurre aquí.
+      
+      Habría que mirar por qué sucede, y cómo arreglarlo. También sería interesante probar a hacer un entrenamiento con múltiples casos
+      en los que estos vayan rotando/variando.

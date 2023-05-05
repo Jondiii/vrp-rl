@@ -4,7 +4,7 @@ from vrpEnv import VRPEnv
 import os
 import time
 
-ALGORTIHM = "PPO"
+ALGORTIHM = "PPO_IsDoneNoVariable"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 

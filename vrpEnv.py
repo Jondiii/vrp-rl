@@ -98,9 +98,9 @@ class VRPEnv(gym.Env):
             "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.maxNumNodos),
             "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
-            "v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
-            "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
-            "n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float) # Con DQN hay que comentar esta línea
+            #"v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
+            #"n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
+            #"n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float) # Con DQN hay que comentar esta línea
         })
 
 
@@ -226,9 +226,9 @@ class VRPEnv(gym.Env):
         obs["v_curr_position"] = self.v_posicionActual
         obs["v_loads"] = self.v_loads
         obs["n_demands"] = self.n_demands 
-        obs["v_curr_time"] = self.currTime
-        obs["n_distances"] = self.n_distances.flatten()
-        obs["n_timeLeftTWClose"] = self.getTimeLeftTWClose().flatten()
+        #obs["v_curr_time"] = self.currTime
+        #obs["n_distances"] = self.n_distances.flatten()
+        #obs["n_timeLeftTWClose"] = self.getTimeLeftTWClose().flatten()
 
         return obs
 

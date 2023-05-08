@@ -4,11 +4,11 @@ from vrpEnv import VRPEnv
 import os
 import time
 
-ALGORTIHM = "PPO"
+ALGORTIHM = "DQN_4obs"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
-ITERATIONS = 100
+ITERATIONS = 500
 TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):
@@ -23,7 +23,7 @@ env.createEnv(nVehiculos = 3, nNodos = 30, maxNodeCapacity = 2, sameMaxNodeVehic
 #env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 
-model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
+model = DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
 start_time = time.time()
 

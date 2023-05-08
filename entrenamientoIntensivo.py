@@ -60,7 +60,7 @@ env = VRPEnv(multiTrip = True)
 env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case1"))
 env.reset()
 
-model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
+model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
 start_time = time.time()
 

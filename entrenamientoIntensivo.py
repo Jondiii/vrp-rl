@@ -18,10 +18,10 @@ ITERATIONS = 50
 TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 numCasos = 10
 
-numNodos = 50
-numVehiculos = 20
+numNodos = 30
+numVehiculos = 3
 
-n_maxDemand = 6 # La demanda después se multiplica por 5, para que al generarla con números aleatorios no den decimales.
+n_maxDemand = 2  # La demanda después se multiplica por 5, para que al generarla con números aleatorios no den decimales.
 n_twMin = None
 n_twMax = None
 
@@ -32,7 +32,7 @@ fecha = str(date.today())
 
 dataFolder = "data/intensivo"
 
-ALGORTIHM = "PPO"
+ALGORTIHM = "S_DQN_4obs"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
@@ -46,7 +46,6 @@ if not os.path.exists(log_dir):
 for i in range(numCasos):
     dataPath = os.path.join(dataFolder, "case" + str(i+1))
     dataGen = DataGenerator(numNodos + 1, numVehiculos, dataPath, seed = i) # La i es la semilla
-    
     dataGen.addNodeInfo(n_maxDemand, n_twMin, n_twMax)
     dataGen.addVehicleInfo(v_maxDemads, v_speed)
     dataGen.generateNodeInfo()
@@ -60,7 +59,7 @@ env = VRPEnv(multiTrip = True)
 env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case1"))
 env.reset()
 
-model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
+model = DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir) # le he quitado el CUDA porque esto se hace en el server
 
 start_time = time.time()
 

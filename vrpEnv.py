@@ -96,7 +96,7 @@ class VRPEnv(gym.Env):
         self.observation_space = spaces.Dict({
             "n_visited" :  spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + 2), # TODO: poner como multi binary??
             "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.maxNumNodos),
-            "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
+            #"v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
             #"v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
             #"n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
@@ -224,7 +224,7 @@ class VRPEnv(gym.Env):
         obs = dict()
         obs["n_visited"] = self.visited
         obs["v_curr_position"] = self.v_posicionActual
-        obs["v_loads"] = self.v_loads
+        #obs["v_loads"] = self.v_loads
         obs["n_demands"] = self.n_demands 
         #obs["v_curr_time"] = self.currTime
         #obs["n_distances"] = self.n_distances.flatten()

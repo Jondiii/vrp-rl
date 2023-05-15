@@ -1,0 +1,26 @@
+15/05/2023
+
+ITERATIONS = 150
+TIMESTEPS = 2048*10 # Poner múltiplos de 2048
+numCasos = 10
+
+numNodos = 30
+numVehiculos = 3
+
+n_maxDemand = 2
+n_twMin = None
+n_twMax = None
+
+v_maxDemads = 100
+v_speed = 70
+
+TIEMPO: 3248.98 minutos
+
+env = VRPEnv(multiTrip = True)
+
+
+CAMBIOS:
+    - Se ha probado el algoritmo DQN con 4 observaciones y más iteraciones que antes.
+
+NOTAS: 
+    - Pasa lo mismo que en el caso anterior, no pasa de los 100 de reward.

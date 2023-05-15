@@ -14,7 +14,7 @@ vuelve a empezar desde el primero. Este proceso se repite ITERATIONS veces, por 
 TIMESTEPS * numCasos * TIMESTEPS
 """
 
-ITERATIONS = 50
+ITERATIONS = 150
 TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 numCasos = 10
 
@@ -32,7 +32,7 @@ fecha = str(date.today())
 
 dataFolder = "data/intensivo"
 
-ALGORTIHM = "S_DQN_4obs"
+ALGORTIHM = "S_DQN_4obs_150it"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 

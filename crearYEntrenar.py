@@ -1,8 +1,7 @@
 from stable_baselines3.common.callbacks import EvalCallback
-from stable_baselines3 import PPO, DQN, A2C, SAC
+from stable_baselines3 import PPO, DQN, A2C
 #from wakepy import keepawake
 from vrpEnv import VRPEnv
-from vrpEnvCont import VRPEnvCont
 import os
 import time
 

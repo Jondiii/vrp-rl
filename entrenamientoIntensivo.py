@@ -32,7 +32,7 @@ fecha = str(date.today())
 
 dataFolder = "data/intensivo"
 
-ALGORTIHM = "S_DQN_4obs_150it"
+ALGORTIHM = "S_PPO_4obs_150it"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
@@ -59,7 +59,7 @@ env = VRPEnv(multiTrip = True)
 env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case1"))
 env.reset()
 
-model = DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir) # le he quitado el CUDA porque esto se hace en el server
+model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir) # le he quitado el CUDA porque esto se hace en el server
 
 start_time = time.time()
 

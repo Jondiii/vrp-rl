@@ -18,8 +18,8 @@ ITERATIONS = 150
 TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 numCasos = 10
 
-numNodos = 30
-numVehiculos = 3
+numNodos = 50
+numVehiculos = 10
 
 n_maxDemand = 2  # La demanda después se multiplica por 5, para que al generarla con números aleatorios no den decimales.
 n_twMin = None
@@ -32,7 +32,7 @@ fecha = str(date.today())
 
 dataFolder = "data/intensivo"
 
-ALGORTIHM = "S_PPO_4obs_150it"
+ALGORTIHM = "S_DQN_4obs_150it"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
@@ -59,7 +59,7 @@ env = VRPEnv(multiTrip = True)
 env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case1"))
 env.reset()
 
-model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir) # le he quitado el CUDA porque esto se hace en el server
+model = DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir) # le he quitado el CUDA porque esto se hace en el server
 
 start_time = time.time()
 

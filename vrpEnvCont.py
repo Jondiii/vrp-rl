@@ -3,6 +3,7 @@ import gym
 from gym import spaces
 import numpy as np
 from rutas import Rutas
+import math
 import copy
 import os
 from datetime import date
@@ -10,7 +11,7 @@ from dataGenerator import DataGenerator
 from dataReader import DataReader
 
 
-class VRPEnv(gym.Env):
+class VRPEnvCont(gym.Env):
     metadata = {'render.modes': ['human']}
 
     decayingStart = None
@@ -87,8 +88,9 @@ class VRPEnv(gym.Env):
 
     def createSpaces(self):
         # Tantas acciones como (número de nodos + depot) * número de vehículos
-        self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos)
-
+        #self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos)
+        self.action_space = spaces.Box(0.0, self.maxNumNodos * self.maxNumVehiculos + 1, shape = (1,), dtype = np.float32)
+        
         # Aquí se define cómo serán las observaciones que se pasarán al agente.
         # Se usa multidiscrete para datos que vengan en formato array. Hay que definir el tamaño de estos arrays
         # y sus valores máximos. La primera, "visited", podrá tomar un máximo de 2 valores en cada posición del array
@@ -96,7 +98,7 @@ class VRPEnv(gym.Env):
         self.observation_space = spaces.Dict({
             "n_visited" :  spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + 2), # TODO: poner como multi binary??
             "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.maxNumNodos),
-            "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
+            #"v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
             #"v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
             #"n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
@@ -108,6 +110,8 @@ class VRPEnv(gym.Env):
         self.currSteps += 1
         if action >= self.nNodos * self.nVehiculos:
             return self.getState(), -1, self.isDoneFunction(), dict(info = "Acción rechazada por actuar sobre un nodo no disponible.", accion = action, nNodos = self.nNodos)
+
+        action = math.floor(action)
 
         # supongamos que nNodos = 6, nVehiculos = 2 y action = 6 * 2 + 2
         # Calculamos el vehículo que realiza la acción

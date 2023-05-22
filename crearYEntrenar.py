@@ -1,10 +1,12 @@
 from stable_baselines3.common.callbacks import EvalCallback
-from stable_baselines3 import PPO, DQN
+from stable_baselines3 import PPO, DQN, A2C, SAC
+#from wakepy import keepawake
 from vrpEnv import VRPEnv
+from vrpEnvCont import VRPEnvCont
 import os
 import time
 
-ALGORTIHM = "PPO_3obs_3"
+ALGORTIHM = "SAC_4obs_2"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
@@ -18,14 +20,15 @@ if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
 
-env = VRPEnv(multiTrip = True)
+env = VRPEnvCont(multiTrip = True)
 env.createEnv(nVehiculos = 3, nNodos = 30, maxNodeCapacity = 2, sameMaxNodeVehicles=True)
 env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 
-model = PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
+model = SAC("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
 start_time = time.time()
+#with keepawake(keep_screen_awake=False):
 
 for i in range(1, ITERATIONS+1):
     model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)

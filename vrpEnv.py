@@ -451,7 +451,7 @@ class VRPEnv(gym.Env):
         else:
             self.grafoCompletado.guardarGrafos(fecha)
 
-        self.crearReport(self.ordenVisitasCompletas, self.tiempoFinal, fecha)
+       # self.crearReport(self.ordenVisitasCompletas, self.tiempoFinal, fecha)
 
 
     # Guarda el conjunto actual de grafos, independientemente de si están completos o no

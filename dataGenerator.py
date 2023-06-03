@@ -25,7 +25,7 @@ class DataGenerator:
 
 
 
-    def addNodeInfo(self, n_MaxDemands = 30, n_twMin = None, n_twMax =  None):
+    def addNodeInfo(self, n_MaxDemands = 6, n_twMin = None, n_twMax =  None):
         self.n_MaxDemands = n_MaxDemands
         self.n_twMin = n_twMin
         self.n_twMax = n_twMax

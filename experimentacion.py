@@ -53,7 +53,10 @@ for algoritmo in listaAlgoritmos:
 
     for i in range(1, ITERATIONS+1):
         model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = algoritmo)
-        model.save(f"{models_dir}/{TIMESTEPS*i}")
+        if i % 100:
+            model.save(f"{models_dir}/{TIMESTEPS*i}")
+    
+    model.save(f"{models_dir}/final")
 
     print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))
 

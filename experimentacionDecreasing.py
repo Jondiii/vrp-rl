@@ -46,7 +46,7 @@ for algoritmo in listaAlgoritmos:
     if caso[1] == 'A2C':
         model = A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
-    if caso[1] == 'PPO':
+    if caso[1] == 'DQN':
         model = DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
     start_time = time.time()
@@ -54,7 +54,10 @@ for algoritmo in listaAlgoritmos:
 
     for i in range(1, ITERATIONS+1):
         model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = algoritmo)
-        model.save(f"{models_dir}/{TIMESTEPS*i}")
+        if i % 100:
+            model.save(f"{models_dir}/{TIMESTEPS*i}")
+    
+    model.save(f"{models_dir}/final")
 
     print("--- %s minutos ---" % round((time.time() - start_time)/60, 2))
 

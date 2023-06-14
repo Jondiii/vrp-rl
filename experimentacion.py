@@ -45,7 +45,7 @@ for algoritmo in listaAlgoritmos:
     if caso[1] == 'A2C':
         model = A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
-    if caso[1] == 'PPO':
+    if caso[1] == 'DQN':
         model = DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
     start_time = time.time()

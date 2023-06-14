@@ -1,5 +1,5 @@
 from stable_baselines3 import PPO, A2C
-from vrpEnv import VRPEnv
+from vrpEnv2 import VRPEnv
 import os
 import time
 
@@ -7,7 +7,7 @@ import time
 
 model_name = "102400.zip"
 
-models_dir = "models\pruebaActionMenos1"
+models_dir = "models\\NEW_A2C"
 #models_dir = "modelsEXP"
 
 model_path = f"{models_dir}/{model_name}"
@@ -34,7 +34,6 @@ for ep in range(episodes):
         print(action)
         obs, reward, done, info = env.step(action)
         print(obs["n_visited"])
-
     env.render(models_dir)
     env.graphicalRender()
     

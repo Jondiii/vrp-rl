@@ -1,10 +1,10 @@
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3 import PPO, DQN, A2C
-from vrpEnv import VRPEnv
+from vrpEnv2 import VRPEnv
 import os
 import time
 
-ALGORTIHM = "pruebaActionMenos1"
+ALGORTIHM = "NEW_A2C"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 

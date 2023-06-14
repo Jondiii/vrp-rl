@@ -16,6 +16,8 @@ class VRPEnv(gym.Env):
     decayingStart = None
     grafoCompletado = None
 
+    currVehicle = 0
+
     def __init__(self, seed = 6, multiTrip = False, singlePlot = False):
         #np.random.seed(seed)
         self.multiTrip = multiTrip
@@ -87,7 +89,7 @@ class VRPEnv(gym.Env):
 
     def createSpaces(self):
         # Tantas acciones como (número de nodos + depot) * número de vehículos
-        self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos - 1)
+        self.action_space = spaces.Discrete(self.maxNumNodos - 1)
 
         # Aquí se define cómo serán las observaciones que se pasarán al agente.
         # Se usa multidiscrete para datos que vengan en formato array. Hay que definir el tamaño de estos arrays
@@ -106,18 +108,11 @@ class VRPEnv(gym.Env):
 
     def step(self, action):
         self.currSteps += 1
-        if action >= self.nNodos * self.nVehiculos:
+        if action >= self.nNodos:
             return self.getState(), -1, self.isDoneFunction(), dict(info = "Acción rechazada por actuar sobre un nodo no disponible.", accion = action, nNodos = self.nNodos)
 
-        # supongamos que nNodos = 6, nVehiculos = 2 y action = 6 * 2 + 2
-        # Calculamos el vehículo que realiza la acción
-        vehiculo = action // self.nNodos
-        # vehiculo = 1, es decir, el segundo vehículo
-        action = action % self.nNodos
-        # action = 14   %  6 = 2 # Sería visitar el tercer nodo
-
         # Comprobar si la acción es válida
-        if not self.checkAction(action, vehiculo):
+        if not self.checkAction(action, self.currVehicle):
             return self.getState(), -1, self.isDoneFunction(), dict()
 
         # Eliminar el lugar que se acaba de visitar de las posibles acciones
@@ -125,36 +120,39 @@ class VRPEnv(gym.Env):
 
         if self.multiTrip:
             if action == 0:
-                self.v_loads[vehiculo] = self.v_maxCapacity
+                self.v_loads[self.currVehicle] = self.v_maxCapacity
                 self.visited[action] = 0 # Si lo que se ha visitado es el depot, no lo marcamos como visitado 
 
-        self.v_loads[vehiculo] -= self.n_demands[action] # Añadimos la demanda del nodo a la carga del vehículo
+        self.v_loads[self.currVehicle] -= self.n_demands[action] # Añadimos la demanda del nodo a la carga del vehículo
 
         # Marcamos la visita en el grafo
-        distancia, tiempo = self.rutas.visitEdge(vehiculo, self.v_posicionActual[vehiculo], action)
+        distancia, tiempo = self.rutas.visitEdge(self.currVehicle, self.v_posicionActual[self.currVehicle], int(action))
 
         # Ponemos la demanda del nodo a 0
         self.n_demands[action] = 0
         
         # Calcular la recompensa. Será inversamente proporcional a la distancia recorrida. 
-        reward = self.getReward(distancia, action, vehiculo)
+        reward = self.getReward(distancia, action, self.currVehicle)
 
         # Actualizar posición del vehículo que realice la acción.
-        self.v_posicionActual[vehiculo] = action
+        self.v_posicionActual[self.currVehicle] = action
 
         # Añadir el nodo a la ruta del vehículo.
-        self.v_ordenVisitas[vehiculo].append(action)
+        self.v_ordenVisitas[self.currVehicle].append(action)
 
         # Actualizar las distancias a otros nodos
-        self.n_distances[vehiculo] = self.distanceMatrix[action]
+        self.n_distances[self.currVehicle] = self.distanceMatrix[action]
 
         # Actualizar tiempo de recorrido del vehículo que realice la acción
-        self.currTime[vehiculo] += tiempo
+        self.currTime[self.currVehicle] += tiempo
 
         #self.graphicalRender()
 
         # Comprobar si se ha llegado al final del episodio
         done = self.isDoneFunction()
+
+        if round(self.v_loads[self.currVehicle] / self.v_maxCapacity, 1) >= 0.9:
+            self.currVehicle += 1
 
         return self.getState(), reward, done, dict()
 
@@ -163,6 +161,7 @@ class VRPEnv(gym.Env):
     def reset(self):
         self.visited = np.zeros(shape=(self.nNodos))
         self.visited = np.pad(self.visited, (0,self.maxNumNodos - self.nNodos), 'constant', constant_values = 1)
+        self.currVehicle = 0
 
         if self.multiTrip:
             self.visited[0] = 0

@@ -13,7 +13,8 @@ class DataGenerator:
                  seed = 6
                  ):
         
-        np.random.seed(seed)
+        #np.random.seed(seed)
+
         if not os.path.exists(dataPath):
             os.makedirs(dataPath)
 

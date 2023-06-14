@@ -1,5 +1,5 @@
 from stable_baselines3.common.callbacks import CheckpointCallback
-from stable_baselines3 import PPO, DQN
+from stable_baselines3 import PPO, DQN, A2C
 from dataGenerator import  DataGenerator
 from vrpEnv import VRPEnv
 import os
@@ -14,9 +14,9 @@ vuelve a empezar desde el primero. Este proceso se repite ITERATIONS veces, por 
 TIMESTEPS * numCasos * TIMESTEPS
 """
 
-ITERATIONS = 150
-TIMESTEPS = 2048*10 # Poner múltiplos de 2048
-numCasos = 10
+ITERATIONS = 2
+TIMESTEPS = 2048*5 # Poner múltiplos de 2048
+numCasos = 5
 
 numNodos = 50
 numVehiculos = 10
@@ -32,7 +32,7 @@ fecha = str(date.today())
 
 dataFolder = "data/intensivo"
 
-ALGORTIHM = "S_DQN_4obs_150it"
+ALGORTIHM = "A2C_Aver"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
@@ -55,11 +55,11 @@ for i in range(numCasos):
 
 # Como se va a entrenar un modelo con múltiples variantes de un mismo entorno, primero hay que crear el modelo y entrenarlo un poco
 # Una vez creado, en las siguientes iteraciones se cargará dicho modelo, para entrenarlo con un entorno algo distinto.
-env = VRPEnv(multiTrip = True)
+env = VRPEnv()
 env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case1"))
 env.reset()
 
-model = DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir) # le he quitado el CUDA porque esto se hace en el server
+model = A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir) # le he quitado el CUDA porque esto se hace en el server
 
 start_time = time.time()
 

@@ -5,11 +5,11 @@ from vrpEnv import VRPEnv
 import os
 import time
 
-ALGORTIHM = "SAC_4obs_2"
+ALGORTIHM = "A2C_LargoNoMultiTrip"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
-ITERATIONS = 500
+ITERATIONS = 50
 TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):
@@ -19,12 +19,12 @@ if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
 
-env = VRPEnvCont(multiTrip = True)
-env.createEnv(nVehiculos = 3, nNodos = 30, maxNodeCapacity = 2, sameMaxNodeVehicles=True)
+env = VRPEnv()
+env.createEnv(nVehiculos = 5, nNodos = 20, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
 env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 
-model = SAC("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
+model = A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
 start_time = time.time()
 #with keepawake(keep_screen_awake=False):

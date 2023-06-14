@@ -1,22 +1,22 @@
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, A2C
 from vrpEnv import VRPEnv
 import os
 import time
+#model_name = "normal_A2C_P.zip" # A2C_I_P mal
 
-ALGORTIHM = "PPO"
+model_name = "122880.zip"
 
-model_name = "model"
-
-#models_dir = "models/" + ALGORTIHM
-models_dir = "Resultados/Prueba_006"
+models_dir = "models/A2C_Aver"
+#models_dir = "modelsEXP"
 model_path = f"{models_dir}/{model_name}"
 
 env = VRPEnv()
-env.createEnv(nVehiculos = 10, nNodos = 100, maxNodeCapacity = 2, maxNumVehiculos = 10, maxNumNodos = 100,)
+
+env.createEnv(nVehiculos = 10, nNodos = 50, maxNodeCapacity = 2, maxNumVehiculos = 10, maxNumNodos = 50)
 #env.setIncreasingIsDone(200)
 env.reset()
 
-model = PPO.load(model_path, env)
+model = A2C.load(model_path, env)
 
 episodes = 1
 
@@ -28,9 +28,12 @@ for ep in range(episodes):
     
     while not done:
         action, _ = model.predict(obs)
+        print(action)
         obs, reward, done, info = env.step(action)
 
+    env.render()
     env.graphicalRender()
+    
 
     env.close()
 

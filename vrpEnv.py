@@ -17,7 +17,7 @@ class VRPEnv(gym.Env):
     grafoCompletado = None
 
     def __init__(self, seed = 6, multiTrip = False, singlePlot = False):
-        np.random.seed(seed)
+        #np.random.seed(seed)
         self.multiTrip = multiTrip
         self.singlePlot = singlePlot
         self.currSteps = 0
@@ -451,7 +451,7 @@ class VRPEnv(gym.Env):
         else:
             self.grafoCompletado.guardarGrafos(fecha)
 
-       # self.crearReport(self.ordenVisitasCompletas, self.tiempoFinal, fecha)
+        self.crearReport(self.ordenVisitasCompletas, self.tiempoFinal, fecha)
 
 
     # Guarda el conjunto actual de grafos, independientemente de si están completos o no

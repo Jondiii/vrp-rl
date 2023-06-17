@@ -14,14 +14,14 @@ vuelve a empezar desde el primero. Este proceso se repite ITERATIONS veces, por 
 TIMESTEPS * numCasos * TIMESTEPS
 """
 
-ITERATIONS = 2
+ITERATIONS = 100
 TIMESTEPS = 2048*5 # Poner múltiplos de 2048
 numCasos = 5
 
-numNodos = 50
-numVehiculos = 10
+numNodos = 25
+numVehiculos = 5
 
-n_maxDemand = 2  # La demanda después se multiplica por 5, para que al generarla con números aleatorios no den decimales.
+n_maxDemand = 4  # La demanda después se multiplica por 5, para que al generarla con números aleatorios no den decimales.
 n_twMin = None
 n_twMax = None
 
@@ -32,7 +32,7 @@ fecha = str(date.today())
 
 dataFolder = "data/intensivo"
 
-ALGORTIHM = "A2C_Aver"
+ALGORTIHM = "A2C_intenso_noMulti"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
@@ -71,9 +71,8 @@ for j in range(1, ITERATIONS + 1):
     for i in range(1, numCasos + 1):
         env.close()
 
-        env = VRPEnv(multiTrip = True)
+        env = VRPEnv()
         env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case" + str(i)))
-        env.setIncreasingIsDone(TIMESTEPS)
         env.reset()
 
         #model = PPO.load(f"{models_dir}/{TIMESTEPS * i * j}", env)

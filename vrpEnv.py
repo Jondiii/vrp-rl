@@ -377,9 +377,9 @@ class VRPEnv(gym.Env):
 
         reward = round(1/abs(distancia), 2)
 
-        if self.visited[0] == 0:
-            reward += 1 # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
-            pass
+        if all(self.visited[1:]):
+            if action == 0:
+                reward += 1 # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
         
         return reward
 

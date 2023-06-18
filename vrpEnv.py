@@ -16,6 +16,9 @@ class VRPEnv(gym.Env):
     decayingStart = None
     grafoCompletado = None
 
+    prev_action = 0
+    prev_vehicle = 0
+
     def __init__(self, seed = 6, multiTrip = False, singlePlot = False):
         #np.random.seed(seed)
         self.multiTrip = multiTrip
@@ -152,6 +155,8 @@ class VRPEnv(gym.Env):
         self.currTime[vehiculo] += tiempo
 
         #self.graphicalRender()
+        self.prev_action = action
+        self.prev_vehicle = vehiculo
 
         # Comprobar si se ha llegado al final del episodio
         done = self.isDoneFunction()
@@ -363,13 +368,17 @@ class VRPEnv(gym.Env):
 
 
     def getReward(self, distancia, action, vehicle):
+        if action == self.prev_action:
+            if vehicle == self.prev_vehicle:
+                return -5
+            
         if distancia == 0:
-            return 0.0
+            return -5
 
         reward = round(1/abs(distancia), 2)
 
         if self.visited[0] == 0:
-            #reward += np.sum(self.v_posicionActual) # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
+            reward += 1 # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
             pass
         
         return reward

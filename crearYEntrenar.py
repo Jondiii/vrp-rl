@@ -4,11 +4,11 @@ from vrpEnv import VRPEnv
 import os
 import time
 
-ALGORTIHM = "pruebaActionMenos1"
+ALGORTIHM = "A2C_Mediano3"
 models_dir = "models/" + ALGORTIHM
 log_dir = "logs"
 
-ITERATIONS = 5
+ITERATIONS = 50
 TIMESTEPS = 2048*10 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):
@@ -19,8 +19,8 @@ if not os.path.exists(log_dir):
 
 
 env = VRPEnv()
-env.createEnv(nVehiculos = 5, nNodos = 20, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
-#env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
+env.createEnv(nVehiculos = 6, nNodos = 30, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
+env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 
 model = A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")

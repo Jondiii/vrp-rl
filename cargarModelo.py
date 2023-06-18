@@ -5,9 +5,9 @@ import time
 
 #model_name = "normal_A2C_P.zip" # A2C_I_P mal
 
-model_name = "102400.zip"
+model_name = "6144000.zip"
 
-models_dir = "models\pruebaActionMenos1"
+models_dir = "modelIntenso"
 #models_dir = "modelsEXP"
 
 model_path = f"{models_dir}/{model_name}"
@@ -15,7 +15,7 @@ model_path = f"{models_dir}/{model_name}"
 #env = VRPEnv(singlePlot = True)
 env = VRPEnv()
 
-env.createEnv(nVehiculos = 5, nNodos = 20, maxNodeCapacity = 4, maxNumVehiculos = 5, maxNumNodos = 20)
+env.createEnv(nVehiculos = 5, nNodos = 25, maxNodeCapacity = 4, maxNumVehiculos = 5, maxNumNodos = 25)
 #env.setIncreasingIsDone(200)
 env.reset()
 
@@ -35,7 +35,7 @@ for ep in range(episodes):
         obs, reward, done, info = env.step(action)
         print(obs["n_visited"])
 
-    env.render(models_dir)
+    env.render(model_name)
     env.graphicalRender()
     
 

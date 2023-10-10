@@ -4,12 +4,12 @@ from vrpEnv import VRPEnv
 import os
 import time
 
-ALGORTIHM = "A2C_Mediano3"
-models_dir = "models/" + ALGORTIHM
-log_dir = "logs"
+ALGORTIHM = "entregaFleetbot_A2C_M_I"
+models_dir = "modelsFleetbot/" + ALGORTIHM
+log_dir = "logsFleetbot_A2C_M_I"
 
-ITERATIONS = 50
-TIMESTEPS = 2048*10 # Poner múltiplos de 2048
+ITERATIONS = 100 #Total seran unas 20M de iteraciones
+TIMESTEPS = 2048*100 # Poner múltiplos de 2048
 
 if not os.path.exists(models_dir):
     os.makedirs(models_dir)
@@ -19,7 +19,7 @@ if not os.path.exists(log_dir):
 
 
 env = VRPEnv()
-env.createEnv(nVehiculos = 6, nNodos = 30, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
+env.createEnv(nVehiculos = 13, nNodos = 50, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
 env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
 env.reset()
 

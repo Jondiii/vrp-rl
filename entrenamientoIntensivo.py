@@ -14,6 +14,9 @@ vuelve a empezar desde el primero. Este proceso se repite ITERATIONS veces, por 
 TIMESTEPS * numCasos * TIMESTEPS
 """
 
+"""
+CONFIGURACIÓN DE PARÁMETROS
+"""
 ITERATIONS = 100
 TIMESTEPS = 2048*5 # Poner múltiplos de 2048
 numCasos = 5
@@ -42,7 +45,9 @@ if not os.path.exists(models_dir):
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-
+"""
+CREACIÓN DE LOS CASOS
+"""
 for i in range(numCasos):
     dataPath = os.path.join(dataFolder, "case" + str(i+1))
     dataGen = DataGenerator(numNodos + 1, numVehiculos, dataPath, seed = i) # La i es la semilla
@@ -54,7 +59,7 @@ for i in range(numCasos):
 
 
 # Como se va a entrenar un modelo con múltiples variantes de un mismo entorno, primero hay que crear el modelo y entrenarlo un poco
-# Una vez creado, en las siguientes iteraciones se cargará dicho modelo, para entrenarlo con un entorno algo distinto.
+# Una vez creado, en las siguientes iteraciones se cargará dicho modelo, para entrenarlo con un entorno distinto.
 env = VRPEnv()
 env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case1"))
 env.reset()
@@ -62,7 +67,6 @@ env.reset()
 model = A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir) # le he quitado el CUDA porque esto se hace en el server
 
 start_time = time.time()
-
 
 model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)
 model.save(f"{models_dir}/{TIMESTEPS}")
@@ -75,13 +79,14 @@ for j in range(1, ITERATIONS + 1):
         env.readEnvFromFile(numVehiculos, numNodos, filePath=os.path.join(dataFolder, "case" + str(i)))
         env.reset()
 
-        #model = PPO.load(f"{models_dir}/{TIMESTEPS * i * j}", env)
+        # Modificamos el entorno para poner el nuevo
         model.set_env(env)
 
         model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = ALGORTIHM)
 
         model.save(f"{models_dir}/{TIMESTEPS * (j*(i+1))}")
 
+        # Guardamos las rutas y un report cada vez que se termine de entrenar en uno de los casos
         env.render(fecha)
 
 

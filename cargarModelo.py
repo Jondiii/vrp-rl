@@ -7,15 +7,15 @@ import time
 Definimos primero dónde buscar el modelo ya entrenado.
 """
 
-model_name = "2048000.zip"
-models_dir = "models\pruebaDemo2" # Sin el -1 de las acciones, no funciona ni tan mal, pero tarda la vida. 
+model_name = "20480000.zip"
+models_dir = "modelsFleetbot\entregaFleetbot_A2C_M_I_2" # Sin el -1 de las acciones, no funciona ni tan mal, pero tarda la vida. 
 model_path = f"{models_dir}/{model_name}"
 
 """
 INICIALIZACIÓN DE ENTORNO Y AGENTE
 """
 env = VRPEnv()
-env.createEnv(nVehiculos = 5, nNodos = 20, maxNodeCapacity = 4, maxNumVehiculos = 5, maxNumNodos = 20)
+env.createEnv(nVehiculos = 13, nNodos = 50, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
 #env.setIncreasingIsDone(200)
 env.reset()
 

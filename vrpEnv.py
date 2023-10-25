@@ -100,8 +100,8 @@ class VRPEnv(gym.Env):
 
     # Método que creará el espacio de acciones y el de observaciones.
     def createSpaces(self):
-        # Tantas acciones como (número de nodos + depot) * número de vehículos
-        self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos)
+        # Tantas acciones como (número de nodos + depot) * número de vehículos -1
+        self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos -1)
 
         # Aquí se define cómo serán las observaciones que se pasarán al agente.
         # Se usa multidiscrete para datos que vengan en formato array. Hay que definir el tamaño de estos arrays
@@ -435,7 +435,13 @@ class VRPEnv(gym.Env):
         # Si se han visitado todos los nodos y el vehículo regresa al depot, le añadimos un extra
         if all(self.visited[1:]):
             if action == 0:
-                reward += 1 # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
+                reward += 5 # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
+
+        # La recompensa será también inversamente proporcional a lo lleno que vaya el vehículo, a más llenado más recompensa
+        if self.v_loads[vehicle] == 0:
+            reward += 1
+        else:
+            reward += round(1/abs(self.v_loads[vehicle]), 2) 
         
         return reward
 
@@ -514,7 +520,7 @@ class VRPEnv(gym.Env):
         if self.grafoCompletado == None:
             return
         
-        # Llama a un método de guardado o a otro dependiendo de si se quieren todas las rutas en un mismo polot o no
+        # Llama a un método de guardado o a otro dependiendo de si se quieren todas las rutas en un mismo plot o no
         if self.singlePlot:
             self.grafoCompletado.guardarGrafosSinglePlot(dir)
 

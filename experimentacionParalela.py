@@ -6,8 +6,8 @@ from vrpEnv import VRPEnv
 import os
 import time
 
-ITERATIONS = 5
-TIMESTEPS = 2048*10 # Serán 5M de steps
+ITERATIONS = 500
+TIMESTEPS = 2048*10 # Serán 10M de steps
 
 listaMetodo = ["normal", "increasing", "decreasing"]
 listaAlgoritmo = ["PPO", "DQN", "A2C"]
@@ -81,12 +81,12 @@ def lanzarExperimento(nombreExp):
 
     new_logger = configure(format_strings = ["log", "csv", "tensorboard"])
 
-
     start_time = time.time()
 
+
     for _ in range(1, ITERATIONS+1):
-        model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = nombreExp, callback=eval_callback)
         model.set_logger(new_logger)
+        model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = nombreExp, callback=eval_callback)
 
     print("---%s: %s minutos ---" % (nombreExp, round((time.time() - start_time)/60, 2)))
 

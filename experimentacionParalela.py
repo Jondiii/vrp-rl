@@ -25,13 +25,13 @@ def crearDirectorios(models_dir, log_dir):
 
 def crearModelo(algoritmo, env, log_dir):
     if algoritmo == 'PPO':
-        return PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
+        return PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
     if algoritmo == 'A2C':
-        return  A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
+        return  A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
     if algoritmo == 'DQN':
-        return DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
+        return DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
 
 
 def crearEnv(nVehiculos, nNodos, metodo):
@@ -93,7 +93,7 @@ def lanzarExperimento(nombreExp):
     env.close()
 
 if __name__ == '__main__':
-    pool = Pool(processes = 2)
+    pool = Pool(processes = 4)
     result = pool.map(lanzarExperimento, (listaPruebas))
     pool.close()
     pool.join()

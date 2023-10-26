@@ -94,9 +94,11 @@ def lanzarExperimento(nombreExp):
 
 if __name__ == '__main__':
     pool = Pool(processes = 4)
-    result = pool.map(lanzarExperimento, (listaPruebas))
+    result = pool.imap(lanzarExperimento, (listaPruebas))
+    result.get()
     pool.close()
     pool.join()
+    print('sacabó')
     
 """
 Nota: usar el comando python experimentacion.py >> log.txt 2>> errLog.txt para redirigir las salidas de prints/logs y errores.   

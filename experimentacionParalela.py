@@ -25,13 +25,13 @@ def crearDirectorios(models_dir, log_dir):
 
 def crearModelo(algoritmo, env, log_dir):
     if algoritmo == 'PPO':
-        return PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
+        return PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device='cpu')
 
     if algoritmo == 'A2C':
-        return  A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
+        return  A2C("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device='cpu')
 
     if algoritmo == 'DQN':
-        return DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir)
+        return DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device='cpu')
 
 
 def crearEnv(nVehiculos, nNodos, metodo):

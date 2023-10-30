@@ -98,7 +98,8 @@ def lanzarExperimento(nombreExp):
 if __name__ == '__main__':
     pool = multiprocessing.Pool(processes = 4)
     result = pool.imap(lanzarExperimento, listaPruebas)
-    result.get()
+    #result = pool.map_async(lanzarExperimento, listaPruebas)
+    #result.get()
     pool.close()
     pool.join()
     print('sacabó')

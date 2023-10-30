@@ -57,7 +57,7 @@ def lanzarExperimento(nombreExp):
     log_dir = "logsPaper/"
 
     rank = multiprocessing.current_process()._identity[0]
-    print("Procesador {rank} trabajando en caso {nombreExp}")
+    print(f"Procesador {rank} trabajando en caso {nombreExp}")
 
     caso = nombreExp.split("_")
 

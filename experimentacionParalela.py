@@ -1,7 +1,7 @@
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.logger import configure
 from stable_baselines3 import PPO, DQN, A2C
-from multiprocessing import Pool
+import multiprocessing
 from vrpEnv import VRPEnv
 import os
 import time
@@ -56,6 +56,9 @@ def lanzarExperimento(nombreExp):
     models_dir = "modelsPaper/" + nombreExp
     log_dir = "logsPaper/"
 
+    rank = multiprocessing.current_process()._identity[0]
+    print("Procesador {rank} trabajando en caso {nombreExp}")
+
     caso = nombreExp.split("_")
 
     if caso[0] == 'P':
@@ -93,8 +96,8 @@ def lanzarExperimento(nombreExp):
     env.close()
 
 if __name__ == '__main__':
-    pool = Pool(processes = 4)
-    result = pool.map_async(lanzarExperimento, (listaPruebas))
+    pool = multiprocessing.Pool(processes = 4)
+    result = pool.imap(lanzarExperimento, listaPruebas)
     result.get()
     pool.close()
     pool.join()

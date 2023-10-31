@@ -79,8 +79,7 @@ def lanzarExperimento(nombreExp):
 
     model = crearModelo(caso[1], env, log_dir)
     
-    eval_callback = EvalCallback(env, best_model_save_path=models_dir,
-                            eval_freq=40000, deterministic=True, render=False)
+    #eval_callback = EvalCallback(env, best_model_save_path=models_dir, eval_freq=40000, deterministic=True, render=False)
 
     new_logger = configure(format_strings = ["log", "csv", "tensorboard"])
 
@@ -89,7 +88,11 @@ def lanzarExperimento(nombreExp):
 
     for _ in range(1, ITERATIONS+1):
         model.set_logger(new_logger)
-        model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = nombreExp, callback=eval_callback)
+        #model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = nombreExp, callback=eval_callback)
+        model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = nombreExp)
+
+    model.save(f"{models_dir}")
+
 
     print("---%s: %s minutos ---" % (nombreExp, round((time.time() - start_time)/60, 2)))
 

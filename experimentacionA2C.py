@@ -58,7 +58,7 @@ for tamanyo in listaTamanyo:
             nombreExp = tamanyo + "_" + algoritmo + "_" + metodo + "_" + str(expNum)
 
             models_dir = "modelsPaper/" + nombreExp
-            log_dir = "logsPaper"
+            log_dir = "logsPaper/" + nombreExp
 
             crearDirectorios(models_dir, log_dir)
 

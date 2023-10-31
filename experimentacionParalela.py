@@ -102,7 +102,7 @@ def lanzarExperimento(nombreExp):
 
 if __name__ == '__main__':
     pool = multiprocessing.Pool(processes = 4)
-    result = pool.imap(prueba, listaPruebas)
+    result = pool.imap(lanzarExperimento, listaPruebas)
     #result = pool.map_async(lanzarExperimento, listaPruebas)
     #result.get()
     pool.close()

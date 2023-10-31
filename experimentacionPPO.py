@@ -10,7 +10,7 @@ TIMESTEPS = 2048*10 # Serán 5M de steps
 listaMetodo = ["normal", "increasing", "decreasing"]
 listaTamanyo = ["P", "M", "G"]
 listaExpNumber = [*range(20)]
-algoritmo = 'DQN'
+algoritmo = 'PPO'
 
 
 def crearDirectorios(models_dir, log_dir):
@@ -22,7 +22,7 @@ def crearDirectorios(models_dir, log_dir):
 
 
 def crearModelo(env, log_dir):
-    return DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
+    return PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
 
 def crearEnv(nVehiculos, nNodos, metodo):
@@ -74,6 +74,7 @@ for tamanyo in listaTamanyo:
             model.save(f"{models_dir}/final")
 
             print("---%s: %s minutos ---" % (nombreExp, round((time.time() - start_time)/60, 2)))
+
 
             env.render("renderPaper/"+nombreExp )
             env.close()

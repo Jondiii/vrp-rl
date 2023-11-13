@@ -55,29 +55,31 @@ for tamanyo in listaTamanyo:
 
     for metodo in listaMetodo:
         for expNum in listaExpNumber:
-            nombreExp = tamanyo + "_" + algoritmo + "_" + metodo + "_" + str(expNum)
+            if metodo == "normal":
+                if expNum > 6:
+                    nombreExp = tamanyo + "_" + algoritmo + "_" + metodo + "_" + str(expNum)
 
-            models_dir = "modelsPaper/" + nombreExp
-            log_dir = "logsPaper/" + nombreExp
+                    models_dir = "modelsPaper/" + nombreExp
+                    log_dir = "logsPaper/" + nombreExp
 
-            crearDirectorios(models_dir, log_dir)
+                    crearDirectorios(models_dir, log_dir)
 
-            env = crearEnv(nVehiculos, nNodos, metodo)
+                    env = crearEnv(nVehiculos, nNodos, metodo)
 
-            model = crearModelo(env, log_dir)
+                    model = crearModelo(env, log_dir)
 
-            start_time = time.time()
+                    start_time = time.time()
 
-            for i in range(1, ITERATIONS+1):
-                model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = algoritmo)
+                    for i in range(1, ITERATIONS+1):
+                        model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = algoritmo)
 
-            model.save(f"{models_dir}/final")
+                    model.save(f"{models_dir}/final")
 
-            print("---%s: %s minutos ---" % (nombreExp, round((time.time() - start_time)/60, 2)))
+                    print("---%s: %s minutos ---" % (nombreExp, round((time.time() - start_time)/60, 2)))
 
 
-            env.render("renderPaper/"+nombreExp )
-            env.close()
+                    env.render("renderPaper/"+nombreExp )
+                    env.close()
 
 
     """

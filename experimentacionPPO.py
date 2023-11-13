@@ -55,8 +55,7 @@ for tamanyo in listaTamanyo:
 
     for metodo in listaMetodo:
         for expNum in listaExpNumber:
-            if metodo == "normal":
-                if expNum > 7:
+            if (metodo != "normal" or expNum >7):
                     nombreExp = tamanyo + "_" + algoritmo + "_" + metodo + "_" + str(expNum)
 
                     models_dir = "modelsPaper/" + nombreExp

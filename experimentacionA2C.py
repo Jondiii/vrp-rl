@@ -9,7 +9,7 @@ TIMESTEPS = 2048*10 # Serán 5M de steps
 
 listaMetodo = ["normal", "increasing", "decreasing"]
 listaTamanyo = ["P", "M", "G"]
-listaExpNumber = [*range(20)]
+listaExpNumber = [*range(10)]
 algoritmo = 'A2C'
 
 
@@ -55,7 +55,7 @@ for tamanyo in listaTamanyo:
 
     for metodo in listaMetodo:
         for expNum in listaExpNumber:
-            if (metodo != "normal" or expNum >6):
+            if not (metodo == "normal" and tamanyo == "P"):
                     nombreExp = tamanyo + "_" + algoritmo + "_" + metodo + "_" + str(expNum)
 
                     models_dir = "modelsPaper/" + nombreExp

@@ -19,13 +19,14 @@ class VRPEnv(gym.Env):
     prev_action = 0
     prev_vehicle = 0
 
-    def __init__(self, seed = None, multiTrip = False, singlePlot = False):
+    def __init__(self, seed = None, multiTrip = False, singlePlot = False, name = None):
         if seed is not None:
             np.random.seed(seed)
 
         self.multiTrip = multiTrip
         self.singlePlot = singlePlot
         self.currSteps = 0
+        self.name = name
 
         # Por defecto, se usará la función por defecto de isDone.
         self.isDoneFunction = self.isDone

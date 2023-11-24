@@ -23,17 +23,21 @@ class CustomCallback(BaseCallback):
     def _on_rollout_end(self) -> None:
         env = self.model.get_env()
         
+        tiempoTotal = 0
         for _, tiempo in zip(env.v_ordenVisitas, env.currTime):
-                shortestRoute += tiempo
+                tiempoTotal += tiempo
 
+        if tiempoTotal < shortestRoute:
+            shortestRoute = tiempoTotal
 
-        shortestRouteNodesVisited = np.count_nonzero(env.visited[:env.nNodos] == 1) / env.nNodos
-        with open("resultsPaper/"+env.name+".txt", 'w', encoding="utf-8") as f:
-            f.write(env.name)
-            f.write(str(shortestRoute))
-            f.write(str(shortestRouteNodesVisited)+"%")
+            shortestRouteNodesVisited = np.count_nonzero(env.visited[:env.nNodos] == 1) / env.nNodos
+            
+            with open("resultsPaper/"+env.name+".txt", 'w', encoding="utf-8") as f:
+                f.write(env.name)
+                f.write(str(shortestRoute))
+                f.write(str(shortestRouteNodesVisited)+"%")
 
-            f.close()
+                f.close()
 
 
 def crearDirectorios(models_dir, log_dir, result_dir):

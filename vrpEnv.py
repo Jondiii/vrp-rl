@@ -16,6 +16,8 @@ class VRPEnv(gym.Env):
     decayingStart = None
     grafoCompletado = None
 
+    name = None
+
     prev_action = 0
     prev_vehicle = 0
 
@@ -528,7 +530,7 @@ class VRPEnv(gym.Env):
         else:
             self.grafoCompletado.guardarGrafos(dir)
 
-        self.crearReport(self.ordenVisitasCompletas, self.tiempoFinal, dir)
+        self.crearReport(self.ordenVisitasCompletas, self.tiempoFinal, directorio= dir)
 
 
     # Guarda el conjunto actual de grafos, independientemente de si están completos o no
@@ -548,7 +550,7 @@ class VRPEnv(gym.Env):
     # Método que crea un pequeño report sobre las rutas obtenidas.
     # Simplemente crea un fichero con las rutas creadas mostrando el orden de las visitas, la duración de cada ruta y la duración
     # total de todas las rutas.
-    def crearReport(self, v_ordenVisitas, currTime, fecha, directorio = 'reports', name = 'report', extension = '.txt'):
+    def crearReport(self, v_ordenVisitas, currTime, fecha = None, directorio = 'reports', name = 'report', extension = '.txt'):
         if fecha is None:
             fecha = str(date.today())
 

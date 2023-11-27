@@ -5,8 +5,8 @@ import os
 import time
 import numpy as np
 
-ITERATIONS = 500
-TIMESTEPS = 2048*10 # Serán 5M de steps
+ITERATIONS = 5
+TIMESTEPS = 2048*100 # Serán 5M de steps
 
 listaMetodo = ["normal", "increasing", "decreasing"]
 listaAlgoritmo = ["PPO", "DQN", "A2C"]
@@ -17,25 +17,38 @@ nVehiculos = 13
 nNodos = 50
 
 class CustomCallback(BaseCallback):
-    shortestRoute = 0
+    shortestRoute = 100000000000000
     shortestRouteNodesVisited = None
+
+    def __init__(self, verbose=0):
+            super().__init__(verbose)
+
+    def _on_step(self) -> bool:
+        return True
 
     def _on_rollout_end(self) -> None:
         env = self.model.get_env()
-        
         tiempoTotal = 0
-        for _, tiempo in zip(env.v_ordenVisitas, env.currTime):
+        tiempos = env.get_attr("currTime")
+
+        for tiempo in tiempos[0]:
                 tiempoTotal += tiempo
 
-        if tiempoTotal < shortestRoute:
-            shortestRoute = tiempoTotal
+        print(tiempoTotal)
+        print(self.shortestRoute)
 
-            shortestRouteNodesVisited = np.count_nonzero(env.visited[:env.nNodos] == 1) / env.nNodos
-            
-            with open("resultsPaper/"+env.name+".txt", 'w', encoding="utf-8") as f:
-                f.write(env.name)
-                f.write(str(shortestRoute))
-                f.write(str(shortestRouteNodesVisited)+"%")
+        if tiempoTotal < self.shortestRoute:
+            self.shortestRoute = tiempoTotal
+
+            self.shortestRouteNodesVisited = np.count_nonzero(env.get_attr("visited")[:env.get_attr("nNodos")[0]] == 1) / env.get_attr("nNodos")[0]
+
+            with open("resultsPaper/"+env.get_attr("name")[0]+".txt", 'w', encoding="utf-8") as f:
+                f.write(env.get_attr("name")[0])
+                f.write("\n")
+                f.write(str(self.shortestRoute))
+                f.write("\n")
+                f.write(str(self.shortestRouteNodesVisited)+"%")
+                f.write("\n")
 
                 f.close()
 
@@ -50,6 +63,7 @@ def crearDirectorios(models_dir, log_dir, result_dir):
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
 
+
 def crearModelo(algoritmo, env, log_dir):
     if algoritmo == 'PPO':
         return PPO("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
@@ -61,9 +75,9 @@ def crearModelo(algoritmo, env, log_dir):
         return DQN("MultiInputPolicy", env, verbose=1, tensorboard_log=log_dir, device = "cuda")
 
 
-def crearEnv(nVehiculos, nNodos, metodo, nombreExp):
-    env = VRPEnv(multiTrip = True) 
-    env.createEnv(nVehiculos = nVehiculos, nNodos = nNodos, maxNodeCapacity = 4, sameMaxNodeVehicles=True, name = nombreExp)
+def crearEnv(nVehiculos, nNodos, metodo, name):
+    env = VRPEnv(multiTrip = True, name = name) 
+    env.createEnv(nVehiculos = nVehiculos, nNodos = nNodos, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
 
     if metodo == "decreasing":
         env.setDecayingIsDone(ITERATIONS * TIMESTEPS)
@@ -84,6 +98,8 @@ for algoritmo in listaAlgoritmo:
         log_dir = "logsPaper"
         result_dir = "resultsPaper"
 
+        callback = CustomCallback()
+
         crearDirectorios(models_dir, log_dir, result_dir)
 
         env = crearEnv(nVehiculos, nNodos, metodo, name =  nombreExp)
@@ -93,13 +109,11 @@ for algoritmo in listaAlgoritmo:
         start_time = time.time()
 
         for i in range(1, ITERATIONS+1):
-            model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = algoritmo, callback=CustomCallback())
+            model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = algoritmo, callback=callback)
 
         model.save(f"{models_dir}/final")
-        env.render(nombreExp)
 
         print("---%s: %s minutos ---" % (nombreExp, round((time.time() - start_time)/60, 2)))
-
 
         env.render("renderPaper/"+nombreExp )
         env.close()

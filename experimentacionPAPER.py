@@ -109,13 +109,13 @@ for algoritmo in listaAlgoritmo:
         start_time = time.time()
 
         for i in range(1, ITERATIONS+1):
-            model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = algoritmo, callback=callback)
+            model.learn(total_timesteps = TIMESTEPS, reset_num_timesteps = False, tb_log_name = nombreExp, callback=callback)
 
         model.save(f"{models_dir}/final")
 
         print("---%s: %s minutos ---" % (nombreExp, round((time.time() - start_time)/60, 2)))
 
-        env.render("renderPaper/"+nombreExp )
+        env.render("resultsPaper/"+nombreExp )
         env.close()
 
 

@@ -1,0 +1,19 @@
+############2023-11-27############
+
+Número de vehíclos utilizados: 13
+
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+[0, 28] - t: 0.02 min
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+[0] - t: 0.0 min
+
+Tiempo total: 0.02 min

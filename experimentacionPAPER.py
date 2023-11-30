@@ -7,10 +7,10 @@ import os
 import time
 import numpy as np
 
-ITERATIONS = 5
+ITERATIONS = 50
 TIMESTEPS = 2048*100 # Serán 5M de steps
 
-listaMetodo = ["normal", "increasing"]
+listaMetodo = ["normal", "increasing", "increasing"]
 listaAlgoritmo = ["PPO", "DQN", "A2C"]
 #listaTamanyo = ["P", "M", "G"]
 #listaExpNumber = [*range(20)]
@@ -22,11 +22,12 @@ class CustomCallback(BaseCallback):
     shortestRoute = 100000000000000
     shortestRouteNodesVisited = None
 
-    def __init__(self, check_freq, log_dir, verbose=0):
+    def __init__(self, check_freq, log_dir, bestModelName, verbose=0):
             super().__init__(verbose)
             self.check_freq = check_freq
             self.log_dir = log_dir
-            self.save_path = os.path.join(log_dir, "best_model")
+            self.bestModelName = bestModelName
+            self.save_path = os.path.join(log_dir, bestModelName)
             self.best_mean_reward = -np.inf
 
     def _init_callback(self) -> None:
@@ -130,7 +131,7 @@ for algoritmo in listaAlgoritmo:
         log_dir = "logsPaper2"
         result_dir = "resultsPaper2"
 
-        callback = CustomCallback(500, log_dir)
+        callback = CustomCallback(500, log_dir, nombreExp)
 
         crearDirectorios(models_dir, log_dir, result_dir)
 

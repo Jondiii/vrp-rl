@@ -10,7 +10,7 @@ import numpy as np
 ITERATIONS = 50
 TIMESTEPS = 2048*100 # Serán 5M de steps
 
-listaMetodo = ["normal", "increasing", "increasing"]
+listaMetodo = ["normal", "increasing", "decreasing"]
 listaAlgoritmo = ["PPO", "DQN", "A2C"]
 #listaTamanyo = ["P", "M", "G"]
 #listaExpNumber = [*range(20)]

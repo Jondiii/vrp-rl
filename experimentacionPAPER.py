@@ -7,11 +7,12 @@ import os
 import time
 import numpy as np
 
-ITERATIONS = 50
+ITERATIONS = 30
 TIMESTEPS = 2048*100 # Serán 5M de steps
 
 listaMetodo = ["normal", "increasing", "decreasing"]
-listaAlgoritmo = ["PPO", "DQN", "A2C"]
+listaAlgoritmo = ["PPO"]
+#listaAlgoritmo = ["PPO", "DQN", "A2C"]
 #listaTamanyo = ["P", "M", "G"]
 #listaExpNumber = [*range(20)]
 
@@ -21,7 +22,8 @@ nNodos = 50
 class CustomCallback(BaseCallback):
     shortestRoute = 100000000000000
     shortestRouteNodesVisited = None
-
+    firstTime = False
+    
     def __init__(self, check_freq, log_dir, bestModelName, verbose=0):
             super().__init__(verbose)
             self.check_freq = check_freq
@@ -62,6 +64,31 @@ class CustomCallback(BaseCallback):
 
         return True
 
+
+    def _on_rollout_start(self) -> None:
+        env = self.model.get_env()
+        tiempoTotal = 0
+        tiempos = env.get_attr("currTime")
+
+        for tiempo in tiempos[0]:
+                tiempoTotal += tiempo
+
+        if tiempoTotal < self.shortestRoute:
+            self.shortestRoute = tiempoTotal
+
+            self.shortestRouteNodesVisited = np.count_nonzero(env.get_attr("visited")[:env.get_attr("nNodos")[0]] == 1) / env.get_attr("nNodos")[0]
+
+            with open("resultsPaper2/start/"+env.get_attr("name")[0]+".txt", 'w', encoding="utf-8") as f:
+                f.write(env.get_attr("name")[0])
+                f.write("\n")
+                f.write(str(self.shortestRoute))
+                f.write("\n")
+                f.write(str(self.shortestRouteNodesVisited)+"%")
+                f.write("\n")
+
+                f.close()
+
+
     def _on_rollout_end(self) -> None:
         env = self.model.get_env()
         tiempoTotal = 0
@@ -95,6 +122,7 @@ def crearDirectorios(models_dir, log_dir, result_dir):
 
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
+        os.makedirs(result_dir + "/start")
 
 
 def crearModelo(algoritmo, env, log_dir):
@@ -109,7 +137,7 @@ def crearModelo(algoritmo, env, log_dir):
 
 
 def crearEnv(nVehiculos, nNodos, metodo, name):
-    env = VRPEnv(multiTrip = False, name = name) 
+    env = VRPEnv(multiTrip = False, name = name, seed = 6) 
     env.createEnv(nVehiculos = nVehiculos, nNodos = nNodos, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
 
     if metodo == "decreasing":

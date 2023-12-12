@@ -7,19 +7,19 @@ import time
 Definimos primero dónde buscar el modelo ya entrenado.
 """
 
-model_name = "20480000.zip"
-models_dir = "modelsFleetbot\entregaFleetbot_A2C_M_I_2" # Sin el -1 de las acciones, no funciona ni tan mal, pero tarda la vida. 
+model_name = "PPO_increasing"
+models_dir = "logsPaper2" # Sin el -1 de las acciones, no funciona ni tan mal, pero tarda la vida. 
 model_path = f"{models_dir}/{model_name}"
 
 """
 INICIALIZACIÓN DE ENTORNO Y AGENTE
 """
 env = VRPEnv()
-env.createEnv(nVehiculos = 13, nNodos = 50, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
-#env.setIncreasingIsDone(200)
+env.readEnvFromFile(7, 20, 13, 50, 'data/case20n7v')
+#env.setIncreasingIsDone(5000)
 env.reset()
 
-model = A2C.load(model_path, env)
+model = PPO.load(model_path, env)
 
 # Indicamos el número de episodios (a más episodios más soluciones obtendremos)
 episodes = 1

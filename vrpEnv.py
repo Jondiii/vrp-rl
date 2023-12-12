@@ -16,6 +16,8 @@ class VRPEnv(gym.Env):
     decayingStart = None
     grafoCompletado = None
 
+    seed = None
+
     name = None
 
     prev_action = 0
@@ -24,6 +26,7 @@ class VRPEnv(gym.Env):
     def __init__(self, seed = None, multiTrip = False, singlePlot = False, name = None):
         if seed is not None:
             np.random.seed(seed)
+            self.seed = seed
 
         self.multiTrip = multiTrip
         self.singlePlot = singlePlot
@@ -72,7 +75,7 @@ class VRPEnv(gym.Env):
         self.v_speed = speed
 
         # Generamos datos para usar en el problema si estos no existen
-        self.dataGen = DataGenerator(self.maxNumNodos, self.maxNumVehiculos)
+        self.dataGen = DataGenerator(self.maxNumNodos, self.maxNumVehiculos, seed = self.seed)
         self.generateRandomData()
         
         # Cálculo de matrices de distancia
@@ -83,22 +86,35 @@ class VRPEnv(gym.Env):
 
 
     # Método que creará un entorno a partir de lo que se haya almacenado en los ficheros.
-    def readEnvFromFile(self, nVehiculos, nNodos, filePath):
-        self.dataReader  = DataReader(filePath)
+    def readEnvFromFile(self, nVehiculos, nNodos, maxVehicles, maxNodos, dataPath):
+        self.dataReader  = DataReader(dataPath)
+      
+        self.n_coordenadas = np.array([self.dataReader.nodeInfo["coordenadas_X"], self.dataReader.nodeInfo["coordenadas_Y"]]).T
+        self.n_originalDemands = self.dataReader.nodeInfo["demandas"].to_numpy()
+        self.n_demands = copy.deepcopy(self.n_originalDemands) ## DEJAR
+        self.n_maxNodeCapacity = self.dataReader.nodeInfo["maxDemand"][0] # TODO
 
-        self.loadData(self.dataReader)
-        
+        # Características de los vehículos
+        self.v_maxCapacity = self.dataReader.vehicleInfo["maxCapacity"][0] # TODO
+        self.v_speed = self.dataReader.vehicleInfo["speed"][0]      # TODO
+        self.v_loads = self.dataReader.vehicleInfo["maxCapacity"].to_numpy()
+        self.v_speeds = self.dataReader.vehicleInfo["speed"].to_numpy()
+
+        # Ventanas de tiempo
+        self.minTW = self.dataReader.nodeInfo["minTW"].to_numpy()
+        self.maxTW = self.dataReader.nodeInfo["maxTW"].to_numpy()
+
         self.nNodos = nNodos + 1
         self.nVehiculos = nVehiculos
 
-        self.maxNumNodos = len(self.dataReader.nodeInfo.index)
-        self.maxNumVehiculos = len(self.dataReader.vehicleInfo.index)
+        self.maxNumNodos = maxNodos + 1
+        self.maxNumVehiculos = maxVehicles
 
         # Cálculo de matrices de distancia
         self.createMatrixes()
 
         # Creamos el espacio de acciones y el espacio de observaciones
-        self.createSpaces()
+        self.createSpacesFromFile()
 
 
     # Método que creará el espacio de acciones y el de observaciones.
@@ -112,14 +128,36 @@ class VRPEnv(gym.Env):
         # (1 visitado - 0 sin visitar), por lo que le pasamos un array [2,2,...,2].
         # Algunos menos útiles se han comentado. También en parte porque si hay demasiadas observaciones los algoritmos se saturan y petan.
         self.observation_space = spaces.Dict({
-            "n_visited" :  spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + 2), # TODO: poner como multi binary??
+            "n_visited" :  spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + 2),
             "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.maxNumNodos),
             "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
             #"v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
             "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
+            "valid_actions" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + self.maxNumNodos * self.maxNumVehiculos - 1)
             #"n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float) # Con DQN hay que comentar esta línea
         })
+
+    def createSpacesFromFile(self):
+        # Tantas acciones como (número de nodos + depot) * número de vehículos -1
+        self.action_space = spaces.Discrete(self.maxNumNodos * self.maxNumVehiculos -1)
+
+        # Aquí se define cómo serán las observaciones que se pasarán al agente.
+        # Se usa multidiscrete para datos que vengan en formato array. Hay que definir el tamaño de estos arrays
+        # y sus valores máximos. La primera, "visited", podrá tomar un máximo de 2 valores en cada posición del array
+        # (1 visitado - 0 sin visitar), por lo que le pasamos un array [2,2,...,2].
+        # Algunos menos útiles se han comentado. También en parte porque si hay demasiadas observaciones los algoritmos se saturan y petan.
+        self.observation_space = spaces.Dict({
+            "n_visited" :  spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + 2), # TODO: poner como multi binary??
+            "v_curr_position" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.maxNumNodos ),
+            "v_loads" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumVehiculos) + self.v_maxCapacity + 1), # SOLO se pueden usar enteros
+            "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
+            #"v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
+            "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
+            "valid_actions" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + self.maxNumNodos * self.maxNumVehiculos - 1)
+            #"n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float) # Con DQN hay que comentar esta línea
+        })
+
 
     # Método encargado de ejecutar las acciones seleccionadas por el agente.
     def step(self, action):
@@ -133,48 +171,60 @@ class VRPEnv(gym.Env):
         # Calculamos el vehículo que realiza la acción
         vehiculo = action // self.nNodos
         # vehiculo = 1, es decir, el segundo vehículo
-        action = action % self.nNodos
+        node = action % self.nNodos
         # action = 14   %  6 = 2 # Sería visitar el tercer nodo
 
         # Comprobar si la acción es válida
-        if not self.checkAction(action, vehiculo):
+        if not self.checkAction(node, vehiculo):
             return self.getState(), -1, self.isDoneFunction(), dict()
 
         # Eliminar el lugar que se acaba de visitar de las posibles acciones
-        self.visited[action] = 1
+        self.visited[node] = 1
+
+        self.valid_actions[action] = 0
 
         # Si se permite el multiTrip entonces un vehículo podrá pasar por el depot para vaciar su carga y continuar visitando nodos.
         if self.multiTrip:
-            if action == 0: # Si la acción consiste en volver al depot...
+            if node == 0: # Si la acción consiste en volver al depot...
                 self.v_loads[vehiculo] = self.v_maxCapacity
-                self.visited[action] = 0 # Si lo que se ha visitado es el depot, no lo marcamos como visitado 
+                self.visited[node] = 0 # Si lo que se ha visitado es el depot, no lo marcamos como visitado 
 
-        self.v_loads[vehiculo] -= self.n_demands[action] # Añadimos la demanda del nodo a la carga del vehículo
+        self.v_loads[vehiculo] -= self.n_demands[node] # Añadimos la demanda del nodo a la carga del vehículo
 
         # Marcamos la visita en el grafo
-        distancia, tiempo = self.rutas.visitEdge(vehiculo, self.v_posicionActual[vehiculo], action)
+        distancia, tiempo = self.rutas.visitEdge(vehiculo, self.v_posicionActual[vehiculo], node)
 
         # Ponemos la demanda del nodo a 0
-        self.n_demands[action] = 0
+        self.n_demands[node] = 0
         
         # Calcular la recompensa. Será inversamente proporcional a la distancia recorrida. 
-        reward = self.getReward(distancia, action, vehiculo)
+        reward = self.getReward(distancia, node, vehiculo)
 
         # Actualizar posición del vehículo que realice la acción.
-        self.v_posicionActual[vehiculo] = action
+        self.v_posicionActual[vehiculo] = node
 
         # Añadir el nodo a la ruta del vehículo.
-        self.v_ordenVisitas[vehiculo].append(action)
+        self.v_ordenVisitas[vehiculo].append(node)
 
         # Actualizar las distancias a otros nodos
-        self.n_distances[vehiculo] = self.distanceMatrix[action]
+        self.n_distances[vehiculo] = self.distanceMatrix[node]
 
         # Actualizar tiempo de recorrido del vehículo que realice la acción
         self.currTime[vehiculo] += tiempo
 
         #self.graphicalRender()
-        self.prev_action = action
+        self.prev_action = node
         self.prev_vehicle = vehiculo
+
+        if np.all(self.visited == 1):
+            node = 0
+            distancia, tiempo = self.rutas.visitEdge(vehiculo, self.v_posicionActual[vehiculo], node)
+
+            self.v_posicionActual[vehiculo] = node
+            self.v_ordenVisitas[vehiculo].append(node)
+            self.n_distances[vehiculo] = self.distanceMatrix[node]
+            self.currTime[vehiculo] += tiempo
+
 
         # Comprobar si se ha llegado al final del episodio
         done = self.isDoneFunction()
@@ -216,6 +266,8 @@ class VRPEnv(gym.Env):
         # Creamos un conjunto de rutas nuevo
         self.rutas = Rutas(self.nVehiculos, self.nNodos, self.maxNumVehiculos, self.maxNumNodos, self.n_demands, self.n_coordenadas, self.v_speeds)
         
+        self.valid_actions = np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + range(self.maxNumNodos * self.maxNumVehiculos - 1)
+
         # Creamos una nueva lista que almacena el orden en el que se visitan los nodos.
         self.v_ordenVisitas = []
         # Añadimos nuevas listas que tienen ya un 0 (depot) al comienzo, tantas como vehículos haya.
@@ -264,6 +316,7 @@ class VRPEnv(gym.Env):
         obs["n_demands"] = self.n_demands 
         #obs["v_curr_time"] = self.currTime
         obs["n_distances"] = self.n_distances.flatten() # Como es una matriz multidimensional hay que aplanarla
+        obs["valid_actions"] = self.valid_actions
         #obs["n_timeLeftTWClose"] = self.getTimeLeftTWClose().flatten()
 
         return obs
@@ -503,7 +556,7 @@ class VRPEnv(gym.Env):
         # Características de los nodos
         self.n_coordenadas = np.array([reader.nodeInfo["coordenadas_X"], reader.nodeInfo["coordenadas_Y"]]).T
         self.n_originalDemands = reader.nodeInfo["demandas"].to_numpy()
-        self.n_demands = copy.deepcopy(self.n_originalDemands)
+        self.n_demands = copy.deepcopy(self.n_originalDemands) ## DEJAR
         self.n_maxNodeCapacity = reader.nodeInfo["maxDemand"][0] # TODO
 
         # Características de los vehículos

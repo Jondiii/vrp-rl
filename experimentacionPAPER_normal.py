@@ -10,7 +10,7 @@ import numpy as np
 ITERATIONS = 30
 TIMESTEPS = 2048*100 # Serán 5M de steps
 
-listaMetodo = ["normal", "increasing", "decreasing"]
+listaMetodo = ["normal"]
 listaAlgoritmo = ["PPO"]
 #listaAlgoritmo = ["PPO", "DQN", "A2C"]
 #listaTamanyo = ["P", "M", "G"]
@@ -78,7 +78,7 @@ class CustomCallback(BaseCallback):
 
             self.shortestRouteNodesVisited = np.count_nonzero(env.get_attr("visited")[:env.get_attr("nNodos")[0]] == 1) / env.get_attr("nNodos")[0]
 
-            with open("resultsPaper2/start/"+env.get_attr("name")[0]+".txt", 'w', encoding="utf-8") as f:
+            with open("resultsPaper3/normal/start/"+env.get_attr("name")[0]+".txt", 'w', encoding="utf-8") as f:
                 f.write(env.get_attr("name")[0])
                 f.write("\n")
                 f.write(str(self.shortestRoute))
@@ -102,7 +102,7 @@ class CustomCallback(BaseCallback):
 
             self.shortestRouteNodesVisited = np.count_nonzero(env.get_attr("visited")[:env.get_attr("nNodos")[0]] == 1) / env.get_attr("nNodos")[0]
 
-            with open("resultsPaper2/"+env.get_attr("name")[0]+".txt", 'w', encoding="utf-8") as f:
+            with open("resultsPaper3/normal/"+env.get_attr("name")[0]+".txt", 'w', encoding="utf-8") as f:
                 f.write(env.get_attr("name")[0])
                 f.write("\n")
                 f.write(str(self.shortestRoute))
@@ -155,9 +155,11 @@ for algoritmo in listaAlgoritmo:
     for metodo in listaMetodo:
         nombreExp = algoritmo + "_" + metodo
 
-        models_dir = "modelsPaper2/" + nombreExp
-        log_dir = "logsPaper2"
-        result_dir = "resultsPaper2"
+        caso = "normal"
+
+        models_dir = "modelsPaper3/" + caso + "/" + nombreExp
+        log_dir = "logsPaper3" + "/" + caso
+        result_dir = "resultsPaper3" + "/" + caso
 
         callback = CustomCallback(500, log_dir, nombreExp)
 
@@ -177,7 +179,7 @@ for algoritmo in listaAlgoritmo:
 
         print("---%s: %s minutos ---" % (nombreExp, round((time.time() - start_time)/60, 2)))
 
-        env.render("resultsPaper2/"+nombreExp )
+        env.render(result_dir + "/" +nombreExp )
         env.close()
 
 

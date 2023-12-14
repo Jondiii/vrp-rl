@@ -216,16 +216,6 @@ class VRPEnv(gym.Env):
         self.prev_action = node
         self.prev_vehicle = vehiculo
 
-        if np.all(self.visited == 1):
-            node = 0
-            distancia, tiempo = self.rutas.visitEdge(vehiculo, self.v_posicionActual[vehiculo], node)
-
-            self.v_posicionActual[vehiculo] = node
-            self.v_ordenVisitas[vehiculo].append(node)
-            self.n_distances[vehiculo] = self.distanceMatrix[node]
-            self.currTime[vehiculo] += tiempo
-
-
         # Comprobar si se ha llegado al final del episodio
         done = self.isDoneFunction()
 

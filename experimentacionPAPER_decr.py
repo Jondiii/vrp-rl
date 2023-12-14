@@ -65,29 +65,6 @@ class CustomCallback(BaseCallback):
         return True
 
 
-    def _on_rollout_start(self) -> None:
-        env = self.model.get_env()
-        tiempoTotal = 0
-        tiempos = env.get_attr("currTime")
-
-        for tiempo in tiempos[0]:
-                tiempoTotal += tiempo
-
-        if tiempoTotal < self.shortestRoute:
-            self.shortestRoute = tiempoTotal
-
-            self.shortestRouteNodesVisited = np.count_nonzero(env.get_attr("visited")[:env.get_attr("nNodos")[0]] == 1) / env.get_attr("nNodos")[0]
-
-            with open("resultsPaper3/normal/start/"+env.get_attr("name")[0]+".txt", 'w', encoding="utf-8") as f:
-                f.write(env.get_attr("name")[0])
-                f.write("\n")
-                f.write(str(self.shortestRoute))
-                f.write("\n")
-                f.write(str(self.shortestRouteNodesVisited)+"%")
-                f.write("\n")
-
-                f.close()
-
 
     def _on_rollout_end(self) -> None:
         env = self.model.get_env()

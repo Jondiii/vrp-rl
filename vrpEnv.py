@@ -134,7 +134,7 @@ class VRPEnv(gym.Env):
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
             #"v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
             "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
-            "valid_actions" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + self.maxNumNodos * self.maxNumVehiculos - 1)
+            #"valid_actions" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + self.maxNumNodos * self.maxNumVehiculos - 1)
             #"n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float) # Con DQN hay que comentar esta línea
         })
 
@@ -154,7 +154,8 @@ class VRPEnv(gym.Env):
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
             #"v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
             "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
-            "valid_actions" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + self.maxNumNodos * self.maxNumVehiculos - 1)
+            "valid_actions" : spaces.Discrete(self.nNodos * self.nVehiculos - 1)
+            #"valid_actions" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + self.maxNumNodos * self.maxNumVehiculos - 1)
             #"n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float) # Con DQN hay que comentar esta línea
         })
 
@@ -181,7 +182,7 @@ class VRPEnv(gym.Env):
         # Eliminar el lugar que se acaba de visitar de las posibles acciones
         self.visited[node] = 1
 
-        self.valid_actions[action] = 0
+        #self.valid_actions[action] = 0
 
         # Si se permite el multiTrip entonces un vehículo podrá pasar por el depot para vaciar su carga y continuar visitando nodos.
         if self.multiTrip:
@@ -256,7 +257,8 @@ class VRPEnv(gym.Env):
         # Creamos un conjunto de rutas nuevo
         self.rutas = Rutas(self.nVehiculos, self.nNodos, self.maxNumVehiculos, self.maxNumNodos, self.n_demands, self.n_coordenadas, self.v_speeds)
         
-        self.valid_actions = np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + range(self.maxNumNodos * self.maxNumVehiculos - 1)
+        #self.valid_actions = np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + range(self.maxNumNodos * self.maxNumVehiculos - 1)
+        self.valid_actions = self.nNodos * self.nVehiculos - 1
 
         # Creamos una nueva lista que almacena el orden en el que se visitan los nodos.
         self.v_ordenVisitas = []
@@ -307,6 +309,7 @@ class VRPEnv(gym.Env):
         #obs["v_curr_time"] = self.currTime
         obs["n_distances"] = self.n_distances.flatten() # Como es una matriz multidimensional hay que aplanarla
         obs["valid_actions"] = self.valid_actions
+        #obs["valid_actions"] = self.valid_actions
         #obs["n_timeLeftTWClose"] = self.getTimeLeftTWClose().flatten()
 
         return obs

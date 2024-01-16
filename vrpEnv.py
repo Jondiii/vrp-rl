@@ -154,7 +154,7 @@ class VRPEnv(gym.Env):
             "n_demands" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos) + self.n_maxNodeCapacity * 5),
             #"v_curr_time" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos,), dtype=float),
             "n_distances" : spaces.Box(low = 0, high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float),
-            "valid_actions" : spaces.Discrete(self.nNodos * self.nVehiculos - 1)
+            #"valid_actions" : spaces.Discrete(self.nNodos * self.nVehiculos - 1)
             #"valid_actions" : spaces.MultiDiscrete(np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + self.maxNumNodos * self.maxNumVehiculos - 1)
             #"n_timeLeftTWClose" : spaces.Box(low = float('-inf'), high = float('inf'), shape = (self.maxNumVehiculos * self.maxNumNodos,), dtype=float) # Con DQN hay que comentar esta línea
         })
@@ -258,7 +258,7 @@ class VRPEnv(gym.Env):
         self.rutas = Rutas(self.nVehiculos, self.nNodos, self.maxNumVehiculos, self.maxNumNodos, self.n_demands, self.n_coordenadas, self.v_speeds)
         
         #self.valid_actions = np.zeros(shape=self.maxNumNodos * self.maxNumVehiculos -1) + range(self.maxNumNodos * self.maxNumVehiculos - 1)
-        self.valid_actions = self.nNodos * self.nVehiculos - 1
+        #self.valid_actions = self.nNodos * self.nVehiculos - 1
 
         # Creamos una nueva lista que almacena el orden en el que se visitan los nodos.
         self.v_ordenVisitas = []
@@ -308,7 +308,6 @@ class VRPEnv(gym.Env):
         obs["n_demands"] = self.n_demands 
         #obs["v_curr_time"] = self.currTime
         obs["n_distances"] = self.n_distances.flatten() # Como es una matriz multidimensional hay que aplanarla
-        obs["valid_actions"] = self.valid_actions
         #obs["valid_actions"] = self.valid_actions
         #obs["n_timeLeftTWClose"] = self.getTimeLeftTWClose().flatten()
 
@@ -469,14 +468,9 @@ class VRPEnv(gym.Env):
         
     # Método que calcula la recompensa a dar al agente.
     def getReward(self, distancia, action, vehicle):
-        # Si se selecciona la misma acción que la previa, penalización.
-        if action == self.prev_action:
-            if vehicle == self.prev_vehicle:
-                return -5
-        
         # Si el vehículo no se mueve, penalización.
         if distancia == 0:
-            return -5
+            return -1
 
         # La recompensa será inversamente proporcional a la distancia recorrida, a mayor distancia, menor recompensa
         reward = round(1/abs(distancia), 2)
@@ -487,6 +481,7 @@ class VRPEnv(gym.Env):
                 reward += 5 # La idea detrás de esto es recompensar que los vehículos vuelvan al depot
 
         # La recompensa será también inversamente proporcional a lo lleno que vaya el vehículo, a más llenado más recompensa
+        # Por defecto v_loads está a 100 (capacidad máxima), y se le va restando según se recogen pedidos.
         if self.v_loads[vehicle] == 0:
             reward += 1
         else:

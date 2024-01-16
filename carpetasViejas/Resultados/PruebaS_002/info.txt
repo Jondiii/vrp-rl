@@ -1,0 +1,15 @@
+05/05/2023
+
+ITERATIONS = 50
+TIMESTEPS = 2048*20 = 40960
+
+TIEMPO: 1298.45 minutos
+
+env.createEnv(nVehiculos = 30, nNodos = 100, maxNodeCapacity = 4, sameMaxNodeVehicles=True)
+env.setIncreasingIsDone(ITERATIONS * TIMESTEPS)
+
+CAMBIOS:
+    - La ejecución también se ha realizado en el servidor y ha tardado bastante más que en local
+
+NOTAS:
+    - Creo que el gráfico de los logs se ve raro porque he lanzado la ejecución esta sin haber borrado alguna de las previas.

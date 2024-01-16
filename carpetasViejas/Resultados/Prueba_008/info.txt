@@ -1,0 +1,15 @@
+03/05/2023
+
+ITERATIONS = 100
+TIMESTEPS = 2048*10 # Unas 2M de iteraciones en total
+
+TIEMPO: 178.17 minutos
+
+env.createEnv(nVehiculos = 3, nNodos = 30, maxNodeCapacity = 2, sameMaxNodeVehicles=True)
+SIN isDone variable
+
+CAMBIOS:
+    - Ninguno. Se quería hacer una prueba más larga de un caso pequeño y sin usar el isDone.
+
+NOTAS:
+    - Aunque se haya estampado, ha remontado al de bastante rato. Hay que hacer pruebas más largas.

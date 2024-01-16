@@ -1,0 +1,28 @@
+24/05/2023
+
+ITERATIONS = 20
+TIMESTEPS = 2048*10 # Poner múltiplos de 2048
+numCasos = 10
+
+numNodos = 50
+numVehiculos = 20
+
+n_maxDemand = 30
+n_twMin = None
+n_twMax = None
+
+v_maxDemads = 100
+v_speed = 70
+
+
+TIEMPO: 1298.45 minutos
+
+env = VRPEnv(multiTrip = True)
+
+CAMBIOS:
+    - Se han arreglado los errores del entrenamiento intensivo, por lo que se ha podido hacer al completo en el servidor.
+
+NOTAS:
+    - SOLO se han loggeado con tensorboard las 200k primeras iteraciones, en lugar de las 4M que ha hecho. Se ha completado
+      el entrenamiento porque en log_file se ve que se ha llegado a los 4M de iteraciones, y los modelos guardados
+      también llegan a 4M.

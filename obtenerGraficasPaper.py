@@ -8,10 +8,10 @@ Definimos primero dónde buscar el modelo ya entrenado.
 """
 
 listaMetodo = ["normal", "increasing", "decreasing"]
-listaAlgoritmo = ["PPO", "DQN", "A2C"]
+listaAlgoritmo = ["PPO"]
 listaTamanyo = [(7, 20), (13,50)]
 
-models_dir = 'logsPaper2'
+models_dir = 'logsPaper3'
 model_extension = '.zip'
 
 start_time = time.time()
@@ -24,7 +24,7 @@ for tamanyo in listaTamanyo:
     for algoritmo in listaAlgoritmo:
         for metodo in listaMetodo:
             expCase = algoritmo + '_' + metodo
-            model_path = f"{models_dir}/{expCase}"
+            model_path = f"{models_dir}/{metodo}/{expCase + model_extension}"
 
             env = VRPEnv()
             env.readEnvFromFile(nVehiculos, nNodos, 13, 50, dataPath)
@@ -49,7 +49,7 @@ for tamanyo in listaTamanyo:
                     action, _ = model.predict(obs)
                     obs, reward, done, info = env.step(action)
 
-                env.render('grafosExpFin/' + expCase + "_" + str(nNodos)) # Guarda un report y los grafos en la ruta especificada.
+                env.render('grafosExpFin2/' + expCase + "_" + str(nNodos)) # Guarda un report y los grafos en la ruta especificada.
             
                 env.close()
 

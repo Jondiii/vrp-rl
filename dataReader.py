@@ -40,6 +40,61 @@ class DataReader:
             print("The specified file format {} is not supported.".format(fileFormat), file=sys.stderr)
 
 
+    def loadInfoJson(self, data):
+        self.nodeInfo = self.loadNodeInfoJson(data, 'customer')
+        self.vehicleInfo = self.loadVehicleInfoJson(data)
+
+
+
+    def loadNodeInfoJson(self, data, keyword):
+        nodeData = dict()
+        self.nodeInfo = []
+        
+        value = data['depart']
+        value['coordenadas_X'] = value['coordinates']['x']
+        value['coordenadas_Y'] = value['coordinates']['y']
+
+        self.nodeInfo.append(data['depart'])
+        
+        for key, value in data.items():
+            if keyword in key:
+                value['coordenadas_X'] = value['coordinates']['x']
+                value['coordenadas_Y'] = value['coordinates']['y']
+                self.nodeInfo.append(value)
+
+        self.nodeInfo = pd.DataFrame.from_dict(self.nodeInfo)
+
+        nodeData['index'] = self.nodeInfo.index
+
+        nodeData['coordenadas_X'] = self.nodeInfo['coordenadas_X']
+        nodeData['coordenadas_Y'] = self.nodeInfo['coordenadas_Y']
+        
+        nodeData['demandas'] = self.nodeInfo['demand']
+        nodeData['maxDemand'] = self.nodeInfo['demand'].max()
+        
+        nodeData['minTW'] = self.nodeInfo["ready_time"].to_numpy()
+        nodeData['maxTW'] = self.nodeInfo["due_time"].to_numpy()
+
+        nodeData['service_time'] = self.nodeInfo["service_time"].to_numpy()
+
+        return nodeData
+    
+
+    def loadVehicleInfoJson(self, data):
+        vehicleData = pd.DataFrame(np.zeros(data['max_vehicle_number']))
+
+        vehicleData.drop(columns=0, inplace=True)
+
+        vehicleData['index'] = vehicleData.index
+
+        vehicleData['initialPosition'] = 0
+        vehicleData['maxCapacity'] = int(data["vehicle_capacity"])
+        vehicleData['speed'] = 70
+
+    
+        return vehicleData.to_dict()
+
+
 
     def loadNodeData(self):
         nodeData = dict()
@@ -63,12 +118,17 @@ class DataReader:
         vehicleData['v_speeds'] = self.vehicleInfo["speed"].to_numpy()
 
         return vehicleData
+    
 
-    #def loadInfoJson(self, data):
+    def save_to_csv(self, path, nodeFile, vehicleFile):
+        if not os.path.exists(path):
+            os.makedirs(path)
+        
+        pd.DataFrame(self.nodeInfo).set_index('index').to_csv(os.path.join(path, nodeFile + '.csv'))
+        pd.DataFrame(self.vehicleInfo).set_index('index').to_csv(os.path.join(path, vehicleFile + '.csv'))
 
-
+        
 
 if __name__ == "__main__":
     reader = DataReader('data', 'C101', 'lala', '.json')
-
-    print(reader.nodeInfo)
+    reader.save_to_csv('data/solomon_benchmark', 'nodes', 'vehicles')

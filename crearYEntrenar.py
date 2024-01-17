@@ -13,7 +13,7 @@ models_dir = "temp/" + ALGORTIHM # Directorio donde guardar los modelos generado
 log_dir = "temp"          # Directorios donde guardar los logs
 
 ITERATIONS = 1          # Número de iteraciones
-TIMESTEPS = 2048*10       # Pasos por cada iteración (poner múltiplos de 2048)
+TIMESTEPS = 2048*1       # Pasos por cada iteración (poner múltiplos de 2048)
 
 nVehiculos = 7
 nNodos = 20

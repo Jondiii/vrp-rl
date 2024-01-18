@@ -3,6 +3,7 @@ logs/
 grafos/
 reports/
 data/ 
+pruebas.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
